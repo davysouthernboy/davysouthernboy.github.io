@@ -7,6 +7,22 @@ body {
   border-radius: 25px;
 }
 
+
+#board {
+    width: 540px;
+    height: 540px;
+    /* background-color: green; */
+
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+
+    background: url("./soil.png");
+    background-size: cover;
+    border: 3px solid white;
+    border-radius: 25px;
+}
+
 #board div {
   width: 180px;
   height: 180px;
