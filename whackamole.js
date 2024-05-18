@@ -31,7 +31,7 @@ function setMole() {
     currMoleTile.innerHTML = "";
   }
   let mole = document.createElement("img");
-  mole.src = "./monty-mole.jpg";
+  mole.src = "./monty-mole.png";
   let num = getRandomTile();
   if (currPlantTile && currPlantTile.id == num) {
     return;
@@ -50,7 +50,7 @@ function setPlant() {
     currPlantTile.innerHTML = "";
   }
   let plant = document.createElement("img");
-  plant.src = "./piranha-plant.jpg";
+  plant.src = "./piranha-plant.png";
   let num = getRandomTile();
     if (currMoleTile && currMoleTile.id == num) {
     return;
