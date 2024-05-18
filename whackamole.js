@@ -1,6 +1,6 @@
 let currMoleTile;
 let currPlantTile;
-int score = 0;
+let score = 0;
 let gameOver = false;
 
 
