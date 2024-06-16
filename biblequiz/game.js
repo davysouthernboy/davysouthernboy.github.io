@@ -14,7 +14,7 @@ let availableQuesions = [];
 let questions = [];
 
 fetch(
-    './questions.json'
+    'https://davysouthernboy.github.io/biblequiz/questions.json'
 )
     .then((res) => {
         return res.json();
