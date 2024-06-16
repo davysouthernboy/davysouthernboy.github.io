@@ -1,0 +1,26 @@
+[
+  {
+    "question": "What was the ninth plague described in the Book of Exodus?",
+    "choice1": "Blood",
+    "choice2": "Frog",
+    "choice3": "Darkness",
+    "choice4": "Boil",
+    "answer": 3
+  },
+  {
+    "question": "In the Book of John Chapter 8, Jesus forgave the condemned woman that the Pharisees wanted stoned because?",
+    "choice1": "Jesus came to destroy the law",
+    "choice2": "Jesus came to fulfill the law and charged her sin to His account on the Cross",
+    "choice3": "Jesus didn't think the woman needed any drugs",
+    "choice4": "Jesus knew the Pharisees were lying",
+    "answer": 2
+  },
+  {
+    "question": "In the Book of John Chapter 8, why did Jesus ask the condemned woman 'hath no man condemned thee' after He forgave her?",
+    "choice1": "Jesus made her say 'No man, Lord' because Jesus wanted to break the cycle of guilt that leads to sinning again",
+    "choice2": "Jesus thought the woman needed to be condemned to marriage",
+    "choice3": "The woman had just asked Jesus to turn stone into bread",
+    "choice4": "Jesus thought the woman needed to learn the law",
+    "answer": 1
+  }
+]
