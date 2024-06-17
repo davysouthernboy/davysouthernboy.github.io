@@ -22,5 +22,21 @@
     "choice3": "The woman had just asked Jesus to turn stone into bread",
     "choice4": "Jesus thought the woman needed to learn the law",
     "answer": 1
+  },
+  {
+    "question": "During the Plague of Darkness in the Book of Exodus, could the Egyptians light a lamp?",
+    "choice1": "Yes, because the Egyptians were richer than the slaves",
+    "choice2": "No, it was not necessary because Ra, their sun god, provided light",
+    "choice3": "No, because the darkness was so thick you could touch it.  The Children of Israel had supernatural light",
+    "choice4": "Yes, because the mummies of the pyramid showed them how",
+    "answer": 3
+  },
+  {
+    "question": "In the Book of Matthew Chapter 14, what was so special about Jesus' miracle?",
+    "choice1": "Jesus turned water into wine and kept the party going",
+    "choice2": "Jesus gave sight to the blind and the blind man realized how to win an argument with a woman",
+    "choice3": "Jesus raised Lazarus from the dead",
+    "choice4": "Jesus walked on water.  The very thing the disciples were afraid of, Jesus walked right on top of",
+    "answer": 4
   }
 ]
