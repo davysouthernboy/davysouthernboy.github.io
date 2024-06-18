@@ -38,5 +38,13 @@
     "choice3": "Jesus raised Lazarus from the dead",
     "choice4": "Jesus walked on water.  The very thing the disciples were afraid of, Jesus walked right on top of",
     "answer": 4
+  },
+   {
+    "question": "Are some sins greater than other sins or are all sins the same?",
+    "choice1": "All sins are ranked the same because any one sin can send someone to hell",
+    "choice2": "There is no such thing as sin because we are under Grace",
+    "choice3": "In the Book of John 19:11, Jesus reveals that some sins are greater when He says, 'therefore he that delivered me unto thee hath the greater sin.'",
+    "choice4": "We would not know nor be conscious of sin without the Law",
+    "answer": 3
   }
 ]
