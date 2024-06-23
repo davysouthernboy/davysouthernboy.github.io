@@ -48,11 +48,59 @@
     "answer": 3
   },
   {
+    "question": "What does the Hebrew phrase 'Ani hu' mean in English?",
+    "choice1": "I Am",
+    "choice2": "Shield",
+    "choice3": "Evil Spirit",
+    "choice4": "Wind",
+    "answer": 1
+  },
+  {
     "question": "As humans grow older, their infirmaties increase and their best days are behind them.",
     "choice1": "Aging is an illusion.  It's all in the mind according to Rene Descartes' 'Cognito, Ergo Sum'",
     "choice2": "The World says aging and weakness is the natural order of things",
     "choice3": "Deuteronomy 33:25 says 'As your days. are, so shall your strength be.'  No matter how old you are, your best days are still ahead.",
     "choice4": "The Bible says growing older and weaker is the result of original sin",
     "answer": 3
-  }
+  },
+  {
+    "question": "What phrases are used to decribe Jesus in the Bible?",
+    "choice1": "The Bright And Morning Star",
+    "choice2": "The Lily of the Valley",
+    "choice3": "The Rose of Sharon",
+    "choice4": "All of the Above",
+    "answer": 4
+  },
+  {
+    "question": "What does the Hebrew phrase 'magen' mean in English?",
+    "choice1": "I Am",
+    "choice2": "Shield",
+    "choice3": "Evil Spirit",
+    "choice4": "Wind",
+    "answer": 2
+  },
+   {
+    "question": "There is no more night in Heaven because?",
+    "choice1": "Jesus rose from the dead",
+    "choice2": "There is no more devil",
+    "choice3": "Abraham made it to Heaven",
+    "choice4": "Your mother-in-law was kicked out of Heaven",
+    "answer": 2
+  },
+  {
+    "question": "What is a night season?",
+    "choice1": "A period of time when the sky is black",
+    "choice2": "A period of time where your favorite sport teams loses again",
+    "choice3": "A period of time where you're facing trial, weeping, or confusion",
+    "choice4": "A period of time where you have to eat your loved one cooking and pretend to love it while suppressing your gag reflex",
+    "answer": 3
+  },
+  {
+    "question": "When should you be on guard against the devil attacking you?",
+    "choice1": "After a great spiritual victory or when you are Hungry",
+    "choice2": "When you are Angry or Lonely",
+    "choice3": "When you are Tired",
+    "choice4": "All of the above. H.A.L.T.  When you are in any of the above moods, H.A.L.T. and pray",
+    "answer": 4
+  }  
 ]
