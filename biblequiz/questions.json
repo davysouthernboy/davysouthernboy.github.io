@@ -102,5 +102,22 @@
     "choice3": "When you are Tired",
     "choice4": "All of the above. H.A.L.T.  When you are in any of the above moods, H.A.L.T. and pray",
     "answer": 4
-  }  
+  },
+  {
+    "question": "What does the Hebrew phrase 'marpe' mean in English?",
+    "choice1": "I Am",
+    "choice2": "Shield",
+    "choice3": "Medicine, Life, and Health",
+    "choice4": "Wind",
+    "answer": 3
+  },
+  {
+    "question": "Matthew 7:21 says, 'Not every one who says, 'Lord, Lord,' shall enter into heaven; but he that doeth the will of my Father... What is the Will of the Father'?",
+    "choice1": "To love thy neighbor as thyself",
+    "choice2": "To love yourself",
+    "choice3": "To give away everything you own to the poor",
+    "choice4": "To believe upon Jesus",
+    "answer": 4
+  } 
+    
 ]
