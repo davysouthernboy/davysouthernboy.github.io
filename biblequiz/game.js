@@ -29,7 +29,7 @@ fetch(
 
 //CONSTANTS
 const CORRECT_BONUS = 10;
-const MAX_QUESTIONS = 20;
+const MAX_QUESTIONS = 15;
 
 startGame = () => {
     questionCounter = 0;
