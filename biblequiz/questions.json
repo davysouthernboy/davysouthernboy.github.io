@@ -118,45 +118,6 @@
     "choice3": "To give away everything you own to the poor",
     "choice4": "To believe upon Jesus",
     "answer": 4
-  },
-  {
-    "question": "When grace is being preached, how does man in his flesh tend to respond?",
-    "choice1": "Man in his flesh repents",
-    "choice2": "Man is his flesh asks 'Can God be that good?'",
-    "choice3": "Man in his flesh pays grace forward",
-    "choice4": "Man in his flesh crucifies himself",
-    "answer": 2
-  },
-  {
-    "question": "Why are sexual sins (sex outside of marriage between a woman and a man) greater than other sins?",
-    "choice1": "Illegitimate children are spawn of Satan who throw needless tantrums over candy in public",
-    "choice2": "Because you might give birth to the anti-christ",
-    "choice3": "He or she who commits sexual sin sins against his/her own body and the body is the temple of the holy spirit",
-    "choice4": "Because child support and alimony makes you age and lose your hair faster",
-    "answer": 3
-  },
-  {
-    "question": "What does the number '5' symbollically represent in the Bible?",
-    "choice1": "Grace",
-    "choice2": "Completeness",
-    "choice3": "Law",
-    "choice4": "Love",
-    "answer": 1
-  },  
-  {
-    "question": "What is the opposite of holiness?",
-    "choice1": "Sin",
-    "choice2": "Commonness",
-    "choice3": "Vanity",
-    "choice4": "Mud",
-    "answer": 2
-  },  
-  {
-    "question": "What was the downfall of Rome and the Greece Empire?",
-    "choice1": "Overeating",
-    "choice2": "Homosexuality",
-    "choice3": "Heterosexuality",
-    "choice4": "Pontius Pilates",
-    "answer": 1
-  }   
+  } 
+    
 ]
