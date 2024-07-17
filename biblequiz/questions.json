@@ -158,5 +158,13 @@
     "choice3": "Heterosexuality",
     "choice4": "Pontius Pilates",
     "answer": 1
+  },
+    {
+    "question": "What are some benefits of speaking in tongues?",
+    "choice1": "1 Corinthians 14:4 says 'Praying in Tongues Strengthens Your Spirit'",
+    "choice2": "Isaiah 28:11-12 says 'Praying in Tongues Will Give You Rest'.  This can heal your body.",
+    "choice3": "Romans 8:26 says 'Praying in Tongues allows You To Pray When You Don't Know What To Pray'. The Holy Spirit can pray against danger without worrying you.",
+    "choice4": "All of the above",
+    "answer": 4
   }   
 ]
