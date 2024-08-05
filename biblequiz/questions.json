@@ -159,12 +159,30 @@
     "choice4": "Pontius Pilates",
     "answer": 1
   },
-    {
+  {
     "question": "What are some benefits of speaking in tongues?",
     "choice1": "1 Corinthians 14:4 says 'Praying in Tongues Strengthens Your Spirit'",
     "choice2": "Isaiah 28:11-12 says 'Praying in Tongues Will Give You Rest'.  This can heal your body.",
-    "choice3": "Romans 8:26 says 'Praying in Tongues allows You To Pray When You Don't Know What To Pray'. The Holy Spirit can pray against danger without worrying you.",
+    "choice3": "Romans 8:26 says 'Praying in Tongues allows You To Pray When You Don't Know What To Pray'. The Holy Spirit can pray against danger without worrying .",
     "choice4": "All of the above",
     "answer": 4
-  }   
+  },
+  {
+    "question": "What does the Hebrew word 'Shalom' mean?",
+    "choice1": "Peace",
+    "choice2": "Shield",
+    "choice3": "Shallow",
+    "choice4": "Law",
+    "answer": 1
+  },
+   {
+    "question": "Why is partaking of the Holy Communion important?",
+    "choice1": "Because we're not to forsake assembling with one another",
+    "choice2": "Because we're not to forsake assembling Legos",
+    "choice3": "Because we must remember Jesus did our healing for us at The Cross and we only have to receive it.",
+    "choice4": "Because wasting bread and wine is a sin",
+    "answer": 3
+  }
+
+     
 ]
