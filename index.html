@@ -1,30 +1,129 @@
 <!DOCTYPE html>
 <html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <link rel="stylesheet" href="styles.css"> 
-   <title>Games </title>
-   </head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Development Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
 
 <body>
-<div class = "left">
-<ul class = "menu">
-<li>Home</li>
-<li>About Me</li>
-<li>Skills</li>
-<li>Games</li>
-<li>Contact</li>
-</ul>
-</div>
+    <header>
+        <nav>
+            <h1>Davie Overman</h1>
+            <ul>
+                <li><a href="#about">About Me</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
 
-<div class = "main">
-   <a href="./whackamole/index.html">Whack a Davie</a><br/><br/>
-   <a href="./racing/index.html">Racing</a><br/><br/>
-   <a href="./biblequiz/index.html">Bible Quiz</a><br/><br/>
-   <a href="./triviaquiz/index.html">Trivia Quiz</a><br/><br/>
-   <a href="./flyingcube/index.html">Non-Playable Flying Cube</a><br/><br/>
-   <a href="./doggonecrazy/index.html">Dog Gone Crazy</a><br/><br/> 
-</div>
+    <section id="about">
+        <h2>About Me</h2>
+        <p>Welcome to my portfolio. I’m a game developer with a passion for creating engaging experiences.</p>
+    </section>
+
+    <section id="skills">
+        <h2>Skills</h2>
+        <p>Programming Languages, Game Development, Design Tools, etc.</p>
+    </section>
+
+    <section id="projects">
+        <h2>Projects</h2>
+        <div class="project-grid">
+            <!-- Example Project Card -->
+            <div class="project-card">
+                <h3>Whack a Davie</h3>
+                <p>Fun, interactive whack-a-mole game.</p>
+                   <a href="./whackamole/index.html">View "Whack a Davie" Project</a><br/><br/>
+            </div>
+            <!-- Repeat for other projects -->
+            <div class="project-card">
+                <h3>Racing</h3>
+                <p>Fun, interactive racing game.</p>
+                   <a href="./racing/index.html">Racing</a><br/><br/>
+            </div>
+
+            <div class="project-card">
+                <h3>Gospel of Grace Bible Quiz</h3>
+                <p>Learn Biblical Facts about the Gospel of Grace through this quiz game.</p>
+                   <a href="./biblequiz/index.html">Bible Quiz</a><br/><br/>
+            </div>
+
+            <div class="project-card">
+                <h3>Trivia Quiz</h3>
+                <p>Test your general knowlege with this Trivia Quiz game.</p>
+                   <a href="./triviaquiz/index.html">Trivia Quiz</a><br/><br/>
+            </div>
+
+            <div class="project-card">
+                <h3>Non-playable Flying Cube</h3>
+                <p>Can you watch the cube for more than 30 seconds without getting dizzy?</p>
+                   <a href="./flyingcube/index.html">Non-Playable Flying Cube</a><br/><br/>
+            </div>
+
+
+            <div class="project-card">
+                <h3>Dog Gone Crazy</h3>
+                <p>Can you collect the bones without getting eaten?</p>
+                   <a href="./doggonecrazy/index.html">Dog Gone Crazy</a><br/><br/>
+            </div>
+
+
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contact</h2>
+        <p>Feel free to reach out for collaborations or inquiries.</p>
+        <form id="contactForm">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="user_name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="user_email" required>
+
+    <label for="message">Message:</label>
+    <textarea id="message" name="message" required></textarea>
+
+    <button type="submit">Send</button>
+</form>
+
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script type="text/javascript">
+    (function() {
+        emailjs.init("JU0mIEvokRUx3CHda"); // Initialize EmailJS with your User ID
+    })();
+
+    document.getElementById('contactForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        emailjs.sendForm('service_qb0r6tm', 'template_jgljmz7', this)
+            .then(function() {
+                alert('Thank you! Your message has been sent.');
+            }, function(error) {
+                alert('Oops! There was a problem submitting your form');
+            });
+    });
+</script>
+
+    </section>
+
+    <footer>
+        <p>&copy; 2024 Davie Overman. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+
+   
+   
+   
+    
+
 </body>
 </html>
