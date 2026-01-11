@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Car Inventory</title>
+
+  <style>
+    :root {
+      --gap: 14px;
+      --card-radius: 12px;
+      --border: #e6e6e6;
+      --text: #1a1a1a;
+      --muted: #666;
+      --hover: #f5f7fa;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fafafa;
+      color: var(--text);
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      gap: var(--gap);
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* mobile */
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr)); /* desktop */
+      }
+    }
+
+    /* CLICKABLE CARD LINK */
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .card-link:hover .card {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      background: var(--hover);
+    }
+
+    .top {
+      padding: 12px;
+    }
+
+    .top h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .photo {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #f1f1f1;
+    }
+
+    .photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .meta {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      gap: 6px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .value {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .price .value {
+      font-size: 14px;
+    }
+    
+    .dealer-info {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+.dealer-info .wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.dealer-name {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.dealer-address {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dealer-phone {
+  margin-top: 6px;
+}
+
+.dealer-phone a {
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 800;
+  color: #0b5ed7;
+  font-size: 15px;
+}
+
+.dealer-phone span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Desktop layout */
+@media (min-width: 768px) {
+  .dealer-info .wrap {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+  </style>
+</head>
+<section class="dealer-info">
+  <div class="wrap">
+    <div>
+      <div class="dealer-name">C&amp;R Automotive</div>
+<div class="dealer-address">
+  <a
+    href="https://www.google.com/maps?q=1221+W.+New+Bern+Rd,+Kinston,+NC+28504"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    1221 W. New Bern Rd<br>
+    Kinston, NC 28504
+  </a>
+</div>
+    </div>
+
+    <div class="dealer-phone">
+      <span>Voice Only</span>
+      <a href="tel:+12526865065">📞 252-686-5065</a>
+    </div>
+  </div>
+</section>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>Inventory</h1>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="grid">
+
+    <!-- CARD 1 -->
+    <a href="car.html?id=101" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2019 Dodge Warlock</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2019_Ram_Pickup_1C6RR7GT7KS703471/Photo_Oct_19_2020_113735_AM.jpg" alt="2019 Dodge Warlock" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">104,732</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$20,300</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 2 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2021 Dodge Ram</h2>
+        </div>
+
+        <div class="photo">
+          <img src="" alt="2021 Dodge Ram" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Savage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">99,895</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$19,500</span>
+          </div>
+        </div>
+      </article>
+    </a>
+    
+    <!-- CARD 3 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2019 Dodge Ram</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/Photo_Oct_11_2025_11_25_34_AM.jpg" alt="2019 Dodge Ram" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">67,174</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$14,500</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 4 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2019 Dodge Ram 1500</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2019_RAM_1500_1C6RRFFG9KN790898/Photo_Oct_11_2025_11_32_54_AM.jpg" alt="2019 Dodge Ram 1500" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">67,866</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$22,500</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 5 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2015 Chevy Equinox</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2015_Chevy_Equinox_2GNALBEKXF6374334/Photo_Oct_11_2025_11_44_24_AM.jpg" alt="2015 Chevy Equinox" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Clean</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">120.315</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$7,500</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+
+    <!-- CARD 6 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2016 Ford Fusion</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2016_Ford_Fusion_SE_3FA6P0H74GR210799/Photo_Oct_11_2025_11_49_18_AM.jpg" alt="2016 Ford Fusion" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">174,218</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$6,400</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 7 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2024 Mitsubishi Mirage</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/Photo_Oct_11_2025_12_00_34_PM.jpg" alt="2024 Mitsubishi Mirage" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Clean</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">3930</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$14,000</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 8 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2015 Kia Optima</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2015_Kia_Optima_5XXGR4A67FG404516/Photo_Oct_18_2025_11_00_16_AM.jpg" alt="2015 Kia Optima" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Clean</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">143,416</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$8,000</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 9 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2015 Dodge Journey</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2015_Dodge_Journey_3C4PDCAB6FT688652/Photo_Oct_18_2025_11_14_49_AM.jpg" alt="2015 Dodge Journey" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Clean</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">114,449</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$5,800</span>
+          </div>
+        </div>
+      </article>
+    </a>
+
+    <!-- CARD 10 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2015 Ford Focus</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2015_Ford_Focus_1FADP3K26FL267282/Photo_Oct_18_2025_11_21_37_AM.jpg" alt="2015 Ford Focus" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">184,212</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$4,999</span>4
+          </div>
+        </div>
+      </article>
+    </a>
+    
+    <!-- CARD 11 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2014 Ford Fiesta</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/2014_Ford_Fiesta_3FADP4BJ5EM147659/Photo_Oct_18_2025_11_30_28_AM.jpg" alt="2014 Ford Fiesta" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Salvage</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">148,565</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$4,999</span>
+          </div>
+        </div>
+      </article>
+    </a>
+    
+    <!-- CARD 12 -->
+    <a href="car.html?id=102" class="card-link">
+      <article class="card">
+        <div class="top">
+          <h2>2019 Nissan Sentra</h2>
+        </div>
+
+        <div class="photo">
+          <img src="images/accord.jpg" alt="2019 Nissan Sentra" loading="lazy">
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="label">Title</span>
+            <span class="value">Clean</span>
+          </div>
+          <div class="row">
+            <span class="label">Mileage</span>
+            <span class="value">120,783</span>
+          </div>
+          <div class="row price">
+            <span class="label">Cash Price</span>
+            <span class="value">$7,500</span>
+          </div>
+        </div>
+      </article>
+    </a>
+    
+    
+
+  </section>
+</main>
+</body>
+</html>
+
