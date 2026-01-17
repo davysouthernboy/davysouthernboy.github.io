@@ -46,6 +46,7 @@
     .grid {
       display: grid;
       gap: var(--gap);
+      align-items: start;
       grid-template-columns: repeat(2, minmax(0, 1fr)); /* mobile */
     }
 
@@ -62,16 +63,15 @@
       display: block;
     }
 
-    .card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: var(--card-radius);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* REMOVE height: 100% */
+}
 
     .card-link:hover .card {
       transform: translateY(-2px);
@@ -180,8 +180,45 @@
   }
 }
 
+/* APPLY FOR FINANCING BUTTON */
+.apply-btn {
+  display: inline-block;
+  background: #0b5ed7;           /* dealership blue */
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  text-align: center;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.apply-btn:hover {
+  background: #094db1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+}
+
+.apply-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+
   </style>
 </head>
+
+<script>
+const applyBtn = document.getElementById("applyBtn");
+if (car) {
+  applyBtn.href = "apply.html?vehicle=" + encodeURIComponent(car.title);
+}
+</script>
+
+
+<body>
 <section class="dealer-info">
   <div class="wrap">
     <div>
@@ -205,10 +242,10 @@
   </div>
 </section>
 
-<body>
 <header>
-  <div class="wrap">
+  <div class="wrap" style="display:flex; justify-content:space-between; align-items:center;">
     <h1>Inventory</h1>
+    <a href="apply.html" class="apply-btn">Apply for Financing</a>
   </div>
 </header>
 
@@ -216,14 +253,15 @@
   <section class="grid">
 
     <!-- CARD 1 -->
-    <a href="car.html?id=101" class="card-link">
       <article class="card">
+      <a id="applyBtn" href="car.html?id=101" class="card-link">
+    
         <div class="top">
           <h2>2019 Dodge Warlock</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2019_Ram_Pickup_1C6RR7GT7KS703471/Photo_Oct_19_2020_113735_AM.jpg" alt="2019 Dodge Warlock" loading="lazy">
+          <img src="images/2019_Ram_Pickup_1C6RR7GT7KS703471/17.jpg" alt="2019 Dodge Warlock" loading="lazy">
         </div>
 
         <div class="meta">
@@ -239,13 +277,15 @@
             <span class="label">Cash Price</span>
             <span class="value">$20,300</span>
           </div>
+          <a href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 2 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=102" class="card-link">
         <div class="top">
           <h2>2021 Dodge Ram</h2>
         </div>
@@ -257,7 +297,7 @@
         <div class="meta">
           <div class="row">
             <span class="label">Title</span>
-            <span class="value">Savage</span>
+            <span class="value">Salvage</span>
           </div>
           <div class="row">
             <span class="label">Mileage</span>
@@ -267,19 +307,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$19,500</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
     
     <!-- CARD 3 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=103" class="card-link">
         <div class="top">
           <h2>2019 Dodge Ram</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/Photo_Oct_11_2025_11_25_34_AM.jpg" alt="2019 Dodge Ram" loading="lazy">
+          <img src="images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/1.jpg" alt="2019 Dodge Ram" loading="lazy">
         </div>
 
         <div class="meta">
@@ -295,19 +337,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$14,500</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 4 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+        <a href="car.html?id=104" class="card-link">
         <div class="top">
           <h2>2019 Dodge Ram 1500</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2019_RAM_1500_1C6RRFFG9KN790898/Photo_Oct_11_2025_11_32_54_AM.jpg" alt="2019 Dodge Ram 1500" loading="lazy">
+          <img src="images/2019_RAM_1500_1C6RRFFG9KN790898/1.jpg" alt="2019 Dodge Ram 1500" loading="lazy">
         </div>
 
         <div class="meta">
@@ -323,19 +367,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$22,500</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 5 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=105" class="card-link">
         <div class="top">
           <h2>2015 Chevy Equinox</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2015_Chevy_Equinox_2GNALBEKXF6374334/Photo_Oct_11_2025_11_44_24_AM.jpg" alt="2015 Chevy Equinox" loading="lazy">
+          <img src="images/2015_Chevy_Equinox_2GNALBEKXF6374334/1.jpg" alt="2015 Chevy Equinox" loading="lazy">
         </div>
 
         <div class="meta">
@@ -351,20 +397,22 @@
             <span class="label">Cash Price</span>
             <span class="value">$7,500</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
 
     <!-- CARD 6 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=106" class="card-link">
         <div class="top">
           <h2>2024 Mitsubishi Mirage</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/Photo_Oct_11_2025_12_00_34_PM.jpg" alt="2024 Mitsubishi Mirage" loading="lazy">
+          <img src="images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/1.jpg" alt="2024 Mitsubishi Mirage" loading="lazy">
         </div>
 
         <div class="meta">
@@ -380,19 +428,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$14,000</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 7 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=107" class="card-link">
         <div class="top">
           <h2>2015 Kia Optima</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2015_Kia_Optima_5XXGR4A67FG404516/Photo_Oct_18_2025_11_00_16_AM.jpg" alt="2015 Kia Optima" loading="lazy">
+          <img src="images/2015_Kia_Optima_5XXGR4A67FG404516/1.jpg" alt="2015 Kia Optima" loading="lazy">
         </div>
 
         <div class="meta">
@@ -408,19 +458,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$8,000</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 8 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=108" class="card-link">
         <div class="top">
           <h2>2015 Dodge Journey</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2015_Dodge_Journey_3C4PDCAB6FT688652/Photo_Oct_18_2025_11_14_49_AM.jpg" alt="2015 Dodge Journey" loading="lazy">
+          <img src="images/2015_Dodge_Journey_3C4PDCAB6FT688652/1.jpg" alt="2015 Dodge Journey" loading="lazy">
         </div>
 
         <div class="meta">
@@ -436,19 +488,21 @@
             <span class="label">Cash Price</span>
             <span class="value">$5,800</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
 
     <!-- CARD 9 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=109" class="card-link">
         <div class="top">
           <h2>2015 Ford Focus</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2015_Ford_Focus_1FADP3K26FL267282/Photo_Oct_18_2025_11_21_37_AM.jpg" alt="2015 Ford Focus" loading="lazy">
+          <img src="images/2015_Ford_Focus_1FADP3K26FL267282/1.jpg" alt="2015 Ford Focus" loading="lazy">
         </div>
 
         <div class="meta">
@@ -462,21 +516,23 @@
           </div>
           <div class="row price">
             <span class="label">Cash Price</span>
-            <span class="value">$4,999</span>4
+            <span class="value">$4,999</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
     
     <!-- CARD 10 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=110" class="card-link">
         <div class="top">
           <h2>2014 Ford Fiesta</h2>
         </div>
 
         <div class="photo">
-          <img src="images/2014_Ford_Fiesta_3FADP4BJ5EM147659/Photo_Oct_18_2025_11_30_28_AM.jpg" alt="2014 Ford Fiesta" loading="lazy">
+          <img src="images/2014_Ford_Fiesta_3FADP4BJ5EM147659/1.jpg" alt="2014 Ford Fiesta" loading="lazy">
         </div>
 
         <div class="meta">
@@ -492,13 +548,15 @@
             <span class="label">Cash Price</span>
             <span class="value">$4,999</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>
     
     <!-- CARD 11 -->
-    <a href="car.html?id=102" class="card-link">
+    
       <article class="card">
+      <a href="car.html?id=102" class="card-link">
         <div class="top">
           <h2>2019 Nissan Sentra</h2>
         </div>
@@ -520,6 +578,7 @@
             <span class="label">Cash Price</span>
             <span class="value">$7,500</span>
           </div>
+           <a id="applyBtn" href="apply.html" class="apply-btn" style="margin-top:8px;"> Apply for Financing </a>
         </div>
       </article>
     </a>

@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vehicle Details | C&R Automotive</title>
+
+  <style>
+    :root {
+      --border: #e6e6e6;
+      --text: #1a1a1a;
+      --muted: #666;
+      --blue: #0b5ed7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #fafafa;
+      color: var(--text);
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .meta {
+      display: grid;
+      gap: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .meta div {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .label {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .value {
+      font-weight: 800;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0 24px;
+    }
+
+    .btn {
+      text-decoration: none;
+      padding: 12px 18px;
+      font-weight: 800;
+      border-radius: 8px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      color: white;
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--blue);
+      border: 2px solid var(--blue);
+    }
+
+    /* PHOTO GRID */
+    .photo-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+      .photo-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .photo-grid img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f1f1f1;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <a href="index.html" style="text-decoration:none;color:#0b5ed7;font-weight:700;">
+      ← Back to Inventory
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 id="title">Vehicle</h1>
+
+  <div class="meta">
+    <div><span class="label">Title</span><span class="value" id="vTitle"></span></div>
+    <div><span class="label">Mileage</span><span class="value" id="mileage"></span></div>
+    <div><span class="label">Cash Price</span><span class="value" id="price"></span></div>
+  </div>
+
+  <div class="actions">
+    <a href="apply.html" class="btn primary">Apply for Financing</a>
+    <a href="tel:+12526865065" class="btn secondary">📞 Call Dealer</a>
+  </div>
+
+  <section class="photo-grid" id="photos"></section>
+
+  <footer>
+    C&amp;R Automotive · 1221 W. New Bern Rd · Kinston, NC 28504
+  </footer>
+</main>
+
+<script>
+/* --- SIMPLE STATIC DATA (NO BACKEND) --- */
+const inventory = {
+  "101": {
+    title: "2019 Dodge Warlock",
+    titleStatus: "Salvage",
+    mileage: "104,732",
+    price: "$20,300",
+    photos: [
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/17.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/1.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/2.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/3.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/4.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/5.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/6.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/7.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/8.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/9.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/10.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/11.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/12.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/13.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/14.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/15.jpg",
+      "images/2019_Ram_Pickup_1C6RR7GT7KS703471/16.jpg"
+    ]
+  },
+  "102": {
+    title: "2021 Dodge Ram",
+    titleStatus: "Salvage",
+    mileage: "99,895",
+    price: "$19,500",
+    photos: [
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/17.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/1.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/2.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/3.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/4.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/5.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/6.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/7.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/8.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/9.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/10.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/11.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/12.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/13.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/14.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/15.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/16.jpg"
+      
+    ]
+  },
+  
+  "103": {
+    title: "2019 Dodge Ram",
+    titleStatus: "Salvage",
+    mileage: "67,174",
+    price: "$14,500",
+    photos: [
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/1.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/2.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/3.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/4.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/5.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/6.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/7.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/8.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/9.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/10.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/11.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/12.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/13.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/14.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/15.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/16.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/17.jpg",
+      "images/2019_Ram_1500_Work_Truck_1C6RR6FG0KS514692/18.jpg"
+      
+    ]
+  },
+  
+  "104": {
+    title: "2019 Dodge Ram 1500",
+    titleStatus: "Salvage",
+    mileage: "67,866",
+    price: "$22,500",
+    photos: [
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/1.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/2.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/3.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/4.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/5.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/6.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/7.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/8.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/9.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/10.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/11.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/12.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/13.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/14.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/15.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/16.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/17.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/18.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/19.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/20.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/21.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/22.jpg",
+      "images/2019_RAM_1500_1C6RRFFG9KN790898/23.jpg"
+      
+    ]
+  },
+  
+  "105": {
+    title: "2015 Chevy Equinox",
+    titleStatus: "Clean",
+    mileage: "120,315",
+    price: "$7,500",
+    photos: [
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/1.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/2.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/3.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/4.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/5.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/6.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/7.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/8.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/9.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/10.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/11.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/12.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/13.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/14.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/15.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/16.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/17.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/18.jpg",
+      "images/2015_Chevy_Equinox_2GNALBEKXF6374334/19.jpg"
+    ]
+  },
+  
+  "106": {
+    title: "2024 Mitsubishi Mirage",
+    titleStatus: "Clean",
+    mileage: "3,930",
+    price: "$14,000",
+    photos: [
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/1.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/2.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/3.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/4.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/5.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/6.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/7.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/8.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/9.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/10.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/11.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/12.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/13.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/14.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/15.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/16.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/17.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/18.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/19.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/20.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/21.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/22.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/23.jpg",
+      "images/2024_Mitsubishi_Mirage_ES_ML32FUFJ1RHF16094/24.jpg"
+      
+    ]
+  },
+  
+  "107": {
+    title: "2015 Kia Optima",
+    titleStatus: "Clean",
+    mileage: "143,416",
+    price: "$8,000",
+    photos: [
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/1.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/2.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/3.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/4.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/5.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/6.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/7.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/8.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/9.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/10.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/11.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/12.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/13.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/14.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/15.jpg",
+      "images/2015_Kia_Optima_5XXGR4A67FG404516/16.jpg"
+      
+    ]
+  },
+  
+  "108": {
+    title: "2015 Dodge Journey",
+    titleStatus: "Clean",
+    mileage: "114,449",
+    price: "$5,800",
+    photos: [
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/1.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/2.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/3.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/4.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/5.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/6.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/7.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/8.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/9.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/10.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/11.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/12.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/13.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/14.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/15.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/16.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/17.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/18.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/19.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/20.jpg",
+      "images/2015_Dodge_Journey_3C4PDCAB6FT688652/21.jpg"
+      
+    ]
+  },
+
+
+  "109": {
+    title: "2015 Ford Focus",
+    titleStatus: "Salvage",
+    mileage: "184,000",
+    price: "$4,999",
+    photos: [
+      "images/2015_Ford_Focus_1FADP3K26FL267282/1.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/2.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/3.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/4.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/5.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/6.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/7.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/8.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/9.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/10.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/11.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/12.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/13.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/14.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/15.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/16.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/17.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/18.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/19.jpg",
+      "images/2015_Ford_Focus_1FADP3K26FL267282/20.jpg"  
+    ]
+  },
+  
+  "110": {
+    title: "2014 Ford Fiesta",
+    titleStatus: "Salvage",
+    mileage: "148,565",
+    price: "$4,999",
+    photos: [
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/1.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/2.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/3.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/4.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/5.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/6.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/7.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/8.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/9.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/10.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/11.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/12.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/13.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/14.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/15.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/16.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/17.jpg",
+      "images/2014_Ford_Fiesta_3FADP4BJ5EM147659/18.jpg"  
+    ]
+  }
+  
+  
+};
+
+/* --- READ ID FROM URL --- */
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+const car = inventory[id];
+
+if (car) {
+  document.getElementById("title").textContent = car.title;
+  document.getElementById("vTitle").textContent = car.titleStatus;
+  document.getElementById("mileage").textContent = car.mileage;
+  document.getElementById("price").textContent = car.price;
+
+  const photoGrid = document.getElementById("photos");
+  car.photos.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.loading = "lazy";
+    photoGrid.appendChild(img);
+  });
+} else {
+  document.getElementById("title").textContent = "Vehicle Not Found";
+}
+</script>
+
+</body>
+</html>
+

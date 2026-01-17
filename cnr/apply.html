@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apply for Financing | C&R Automotive</title>
+
+  <style>
+    body {
+      font-family: system-ui, Arial, sans-serif;
+      background: #fafafa;
+      margin: 0;
+    }
+
+    .wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 22px;
+    }
+
+    p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-top: 14px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      background: #0b5ed7;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .notice {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #777;
+    }
+  </style>
+</head>
+<script>
+document.getElementById("financeForm").addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  emailjs.sendForm(
+    "service_qb0r6tm",
+    "template_otlgcqy",
+    this
+  ).then(
+    function() {
+      alert("Application sent successfully. We will contact you shortly.");
+      document.getElementById("financeForm").reset();
+    },
+    function(error) {
+      alert("Failed to send. Please call us directly.");
+      console.error(error);
+    }
+  );
+});
+</script>
+
+<body>
+<div class="wrap">
+  <h1>Pre-Qualification Application</h1>
+
+  <p>
+    This is a <strong>no-obligation pre-qualification form</strong>.
+    <br>No SSN required.
+  </p>
+
+<form id="financeForm">
+  <label>Full Name</label>
+  <input name="name" required>
+
+  <label>Phone Number</label>
+  <input name="phone" required>
+
+  <label>Email</label>
+  <input name="email">
+
+  <label>ZIP Code</label>
+  <input name="zip">
+
+  <label>Employment Status</label>
+  <select name="employment">
+    <option>Employed</option>
+    <option>Self-Employed</option>
+    <option>Unemployed</option>
+    <option>Fixed Income</option>
+  </select>
+
+  <label>Monthly Income</label>
+  <select name="income">
+    <option>Under $1,500</option>
+    <option>$1,500–$2,500</option>
+    <option>$2,500–$3,500</option>
+    <option>$3,500+</option>
+  </select>
+
+  <label>Down Payment</label>
+  <input name="down">
+
+  <label>Vehicle of Interest</label>
+  <input name="vehicle" id="vehicle">
+
+  <button type="submit">Submit Pre-Qualification</button>
+</form>
+
+  <div class="notice">
+    Submitting this form does not guarantee approval.
+    Information is reviewed manually by C&amp;R Automotive.
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+  (function(){
+    emailjs.init("JU0mIEvokRUx3CHda");
+  })();
+</script>
+<script>
+const params = new URLSearchParams(window.location.search);
+const vehicle = params.get("vehicle");
+
+if (vehicle) {
+  const vehicleInput = document.getElementById("vehicle");
+  if (vehicleInput) {
+    vehicleInput.value = vehicle;
+  }
+}
+</script>
+
+</body>
+</html>
+
