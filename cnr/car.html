@@ -139,7 +139,7 @@
   </div>
 
   <div class="actions">
-    <a href="apply.html" class="btn primary">Apply for Financing</a>
+    <a id="applyBtn" href="apply.html" class="btn primary">Apply for Financing</a>
     <a href="tel:+12526865065" class="btn secondary">📞 Call Dealer</a>
   </div>
 
@@ -465,6 +465,12 @@ if (car) {
   });
 } else {
   document.getElementById("title").textContent = "Vehicle Not Found";
+}
+</script>
+<script>
+const applyBtn = document.getElementById("applyBtn");
+if (car) {
+  applyBtn.href = "apply.html?vehicle=" + encodeURIComponent(car.title);
 }
 </script>
 

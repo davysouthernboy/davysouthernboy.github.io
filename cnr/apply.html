@@ -60,26 +60,6 @@
     }
   </style>
 </head>
-<script>
-document.getElementById("financeForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-
-  emailjs.sendForm(
-    "service_qb0r6tm",
-    "template_otlgcqy",
-    this
-  ).then(
-    function() {
-      alert("Application sent successfully. We will contact you shortly.");
-      document.getElementById("financeForm").reset();
-    },
-    function(error) {
-      alert("Failed to send. Please call us directly.");
-      console.error(error);
-    }
-  );
-});
-</script>
 
 <body>
 <div class="wrap">
@@ -149,6 +129,38 @@ if (vehicle) {
     vehicleInput.value = vehicle;
   }
 }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("financeForm");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    emailjs.sendForm(
+      "service_qb0r6tm",
+      "template_otlgcqy",
+      form
+    ).then(
+      function () {
+        alert("Application sent successfully. We will contact you shortly.");
+        form.reset();
+      },
+      function (error) {
+        alert("Failed to send. Please call us directly.");
+        console.error(error);
+      }
+    );
+  });
+
+  /* AUTO-FILL VEHICLE */
+  const params = new URLSearchParams(window.location.search);
+  const vehicle = params.get("vehicle");
+
+  if (vehicle) {
+    document.getElementById("vehicle").value = vehicle;
+  }
+});
 </script>
 
 </body>
