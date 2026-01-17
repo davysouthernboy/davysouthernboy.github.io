@@ -143,8 +143,9 @@ document.addEventListener("DOMContentLoaded", function () {
       form
     ).then(
       function () {
-        alert("Application sent successfully. We will contact you shortly.");
-        form.reset();
+        const vehicle = document.getElementById("vehicle").value;
+        window.location.href = "success.html?vehicle=" + encodeURIComponent(vehicle);
+
       },
       function (error) {
         alert("Failed to send. Please call us directly.");
