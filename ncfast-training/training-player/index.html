@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.2">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;NCFAST Training Player&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-family: Arial, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #f4f6f8;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #222;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>header {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #1f4e79;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 16px 24px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>main {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>max-width: 1000px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 24px auto;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: white;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>box-shadow: 0 2px 12px rgba(0,0,0,0.08);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>h1, h2, h3 {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>video {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: black;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.hidden {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.question {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #f9fafb;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #ddd;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.question p {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>label {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 8px 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>button {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #1f4e79;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 10px 18px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-right: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>button:hover {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #163955;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.status {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin: 16px 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #eef5fb;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 1px solid #c8dced;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.pass {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #eaf7ea;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-color: #b8dfb8;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #1f5c1f;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.fail {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fff0f0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border-color: #e8bcbc;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #8a1f1f;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.certificate {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>border: 6px solid #1f4e79;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 32px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-top: 24px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>background: #fffdf8;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>input[type="text"] {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>width: 300px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>max-width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>padding: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>margin-bottom: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 16px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.small {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>color: #666;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>font-size: 14px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;header&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h1&gt;NCFAST Training Tutorial&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="moduleTitle"&gt;Loading module...&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;main&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;section id="nameSection"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;h2&gt;Welcome&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;p&gt;Enter the learner's name to begin training.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;input type="text" id="learnerName" placeholder="Enter your full name" /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;br /&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="startBtn"&gt;Start Training&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;section id="trainingSection" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;h2 id="lessonHeading"&gt;&lt;/h2&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;video id="lessonVideo" controls controlsList="nodownload"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Your browser does not support HTML5 video.</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/video&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="videoInstructions" class="status"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Watch the lesson video. The quiz will appear after the video ends.</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;section id="quizSection" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3&gt;Lesson Quiz&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;form id="quizForm"&gt;&lt;/form&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="submitQuizBtn"&gt;Submit Quiz&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="quizResult" class="status hidden"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="nextLessonBtn" class="hidden"&gt;Next Lesson&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button id="retryLessonBtn" class="hidden"&gt;Retry Lesson&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div id="progressBox" class="status"&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/section&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;section id="certificateSection" class="hidden"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="certificate" id="certificate"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Certificate of Completion&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;This certifies that&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1 id="certificateName"&gt;&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;has successfully completed the&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3&gt;NCFAST Basic Training Tutorial Series&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p id="certificateDate"&gt;&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p class="small"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>This certificate reflects completion of this training module series and does not by itself imply official state credentialing.</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;button onclick="window.print()"&gt;Print Certificate&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/section&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/main&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const PASSING_SCORE = 80;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const modules = [</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>title: "Module 1 - Searching for an Individual",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>video: "videos/module1-search.mp4",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quiz: [</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>question: "What should you generally do before creating a new person record?",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>choices: [</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Skip directly to application entry",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Search for the individual first",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Create a duplicate record just in case",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Close the case and reopen it"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>answer: 1</p>
+<p class="p1"><span class="Apple-converted-space">          </span>},</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>question: "Why is searching first important?",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>choices: [</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"It prevents duplicate records",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"It makes the computer louder",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"It avoids logging in",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"It skips demographics"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>answer: 0</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>]</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>title: "Module 2 - Starting a SNAP Application",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>video: "videos/module2-snap.mp4",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quiz: [</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>question: "After identifying the correct person, what is the next step in this lesson?",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>choices: [</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Start the SNAP application",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Delete the person",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Restart the system",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Print the home screen"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>answer: 0</p>
+<p class="p1"><span class="Apple-converted-space">          </span>},</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>question: "Training videos should use:",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>choices: [</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Real confidential case data",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Generic or training-safe data",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Anything from production",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Screens with visible SSNs"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>answer: 1</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>]</p>
+<p class="p1"><span class="Apple-converted-space">      </span>},</p>
+<p class="p1"><span class="Apple-converted-space">      </span>{</p>
+<p class="p1"><span class="Apple-converted-space">        </span>title: "Module 3 - Basic Medicaid Application Entry",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>video: "videos/module3-medicaid.mp4",</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quiz: [</p>
+<p class="p1"><span class="Apple-converted-space">          </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>question: "At the end of a lesson, quizzes are useful because they:",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>choices: [</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Slow everything down for no reason",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Reinforce key steps and understanding",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Replace policy manuals entirely",</p>
+<p class="p1"><span class="Apple-converted-space">              </span>"Prevent all future mistakes"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>],</p>
+<p class="p1"><span class="Apple-converted-space">            </span>answer: 1</p>
+<p class="p1"><span class="Apple-converted-space">          </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>]</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let currentModuleIndex = 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let learnerName = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nameSection = document.getElementById("nameSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const learnerNameInput = document.getElementById("learnerName");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const startBtn = document.getElementById("startBtn");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const trainingSection = document.getElementById("trainingSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const lessonHeading = document.getElementById("lessonHeading");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const moduleTitle = document.getElementById("moduleTitle");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const lessonVideo = document.getElementById("lessonVideo");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const quizSection = document.getElementById("quizSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const quizForm = document.getElementById("quizForm");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const submitQuizBtn = document.getElementById("submitQuizBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const quizResult = document.getElementById("quizResult");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const nextLessonBtn = document.getElementById("nextLessonBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const retryLessonBtn = document.getElementById("retryLessonBtn");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const progressBox = document.getElementById("progressBox");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const certificateSection = document.getElementById("certificateSection");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const certificateName = document.getElementById("certificateName");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const certificateDate = document.getElementById("certificateDate");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function saveProgress() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const progress = {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>learnerName,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>currentModuleIndex</p>
+<p class="p1"><span class="Apple-converted-space">      </span>};</p>
+<p class="p1"><span class="Apple-converted-space">      </span>localStorage.setItem("ncfastTrainingProgress", JSON.stringify(progress));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function loadProgress() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const raw = localStorage.getItem("ncfastTrainingProgress");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!raw) return null;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return JSON.parse(raw);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} catch {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return null;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderProgress() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>progressBox.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;strong&gt;Learner:&lt;/strong&gt; ${learnerName || "Not set"}&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;strong&gt;Progress:&lt;/strong&gt; Module ${Math.min(currentModuleIndex + 1, modules.length)} of ${modules.length}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function loadModule(index) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const module = modules[index];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>lessonHeading.textContent = module.title;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>moduleTitle.textContent = module.title;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>lessonVideo.src = module.video;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>lessonVideo.load();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizResult.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>nextLessonBtn.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>retryLessonBtn.classList.add("hidden");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderQuiz(module.quiz);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>renderProgress();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>saveProgress();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderQuiz(questions) {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizForm.innerHTML = "";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>questions.forEach((q, qIndex) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const wrapper = document.createElement("div");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>wrapper.className = "question";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const prompt = document.createElement("p");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>prompt.textContent = `${qIndex + 1}. ${q.question}`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>wrapper.appendChild(prompt);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>q.choices.forEach((choice, cIndex) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const label = document.createElement("label");</p>
+<p class="p1"><span class="Apple-converted-space">          </span>label.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="radio" name="question-${qIndex}" value="${cIndex}"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>${choice}</p>
+<p class="p1"><span class="Apple-converted-space">          </span>`;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>wrapper.appendChild(label);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>quizForm.appendChild(wrapper);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function scoreQuiz() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const module = modules[currentModuleIndex];</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const questions = module.quiz;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>let correct = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>questions.forEach((q, qIndex) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const selected = document.querySelector(`input[name="question-${qIndex}"]:checked`);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (selected &amp;&amp; Number(selected.value) === q.answer) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>correct++;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>const percent = Math.round((correct / questions.length) * 100);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>return { correct, total: questions.length, percent };</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function showCertificate() {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>trainingSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>certificateSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>certificateName.textContent = learnerName;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>certificateDate.textContent = `Date: ${new Date().toLocaleDateString()}`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>moduleTitle.textContent = "Training Complete";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>startBtn.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const enteredName = learnerNameInput.value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (!enteredName) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert("Please enter the learner's name.");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>learnerName = enteredName;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>nameSection.classList.add("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>trainingSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentModuleIndex = 0;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>loadModule(currentModuleIndex);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>lessonVideo.addEventListener("ended", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizSection.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizSection.scrollIntoView({ behavior: "smooth" });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>submitQuizBtn.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const result = scoreQuiz();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizResult.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>quizResult.innerHTML = `</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;strong&gt;Score:&lt;/strong&gt; ${result.correct} / ${result.total} (${result.percent}%)</p>
+<p class="p1"><span class="Apple-converted-space">      </span>`;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (result.percent &gt;= PASSING_SCORE) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quizResult.className = "status pass";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quizResult.innerHTML += "&lt;br&gt;&lt;strong&gt;Status:&lt;/strong&gt; Passed";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (currentModuleIndex &lt; modules.length - 1) {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>nextLessonBtn.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>showCertificate();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quizResult.className = "status fail";</p>
+<p class="p1"><span class="Apple-converted-space">        </span>quizResult.innerHTML += `&lt;br&gt;&lt;strong&gt;Status:&lt;/strong&gt; Not yet passing (need ${PASSING_SCORE}%)`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>retryLessonBtn.classList.remove("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>nextLessonBtn.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>currentModuleIndex++;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>loadModule(currentModuleIndex);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>window.scrollTo({ top: 0, behavior: "smooth" });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>retryLessonBtn.addEventListener("click", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>loadModule(currentModuleIndex);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>window.scrollTo({ top: 0, behavior: "smooth" });</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// Optional resume behavior</p>
+<p class="p1"><span class="Apple-converted-space">    </span>window.addEventListener("load", () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const saved = loadProgress();</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if (saved &amp;&amp; saved.learnerName) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>learnerNameInput.value = saved.learnerName;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
