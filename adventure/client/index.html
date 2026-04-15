@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Adventure – Online</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold:   #f0c030;
+    --green:  #3a7d44;
+    --dark:   #0a0a0f;
+    --panel:  #1a1a2a;
+    --link1:  #22aa44;
+    --link2:  #3366ff;
+    --red:    #cc2222;
+    --hud-bg: #111118;
+  }
+  body {
+    background: var(--dark);
+    color: var(--gold);
+    font-family: 'Press Start 2P', monospace;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+
+  /* ── TITLE SCREEN ── */
+  #titleScreen {
+    position: fixed; inset: 0; z-index: 100;
+    background: #000 url('') no-repeat center;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 24px;
+  }
+  .title-logo {
+    font-size: clamp(14px, 3vw, 28px);
+    color: var(--gold);
+    text-align: center; line-height: 1.8;
+    text-shadow: 0 0 20px rgba(240,192,48,.8), 3px 3px 0 #7a5000;
+    letter-spacing: 2px;
+  }
+  .title-logo .sub { font-size: 0.45em; color: #ccc; margin-top: 8px; }
+  .title-tri { font-size: 48px; margin-bottom: 8px; filter: drop-shadow(0 0 12px #f0c030); }
+  .name-input {
+    background: #000; border: 2px solid var(--gold); color: var(--gold);
+    font-family: 'Press Start 2P', monospace; font-size: 12px;
+    padding: 10px 16px; outline: none; text-align: center; width: 220px;
+  }
+  .name-input::placeholder { color: #555; }
+  .btn-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    font-family: 'Press Start 2P', monospace; font-size: 10px;
+    background: var(--panel); border: 2px solid var(--gold); color: var(--gold);
+    padding: 12px 20px; cursor: pointer; transition: all .15s;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .btn:hover { background: var(--gold); color: #000; }
+  .controls-hint {
+    font-size: 7px; color: #888; text-align: center; line-height: 2.2; max-width: 480px;
+  }
+
+  /* ── WAITING SCREEN ── */
+  #waitScreen {
+    display: none; position: fixed; inset: 0; z-index: 90;
+    background: rgba(0,0,0,.88);
+    align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+  }
+  #waitScreen.visible { display: flex; }
+  .wait-text { font-size: 11px; color: var(--gold); text-align: center; line-height: 2; }
+  .spinner { width: 40px; height: 40px; border: 4px solid #333; border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── HUD ── */
+  #hud {
+    width: 100%; max-width: 1024px;
+    background: var(--hud-bg);
+    border-bottom: 2px solid var(--gold);
+    display: flex; align-items: center; gap: 20px; padding: 8px 16px;
+    flex-wrap: wrap;
+  }
+  .hud-player { display: flex; flex-direction: column; gap: 4px; min-width: 140px; }
+  .hud-name { font-size: 7px; color: #aaa; }
+  .hud-hearts { display: flex; gap: 2px; flex-wrap: wrap; }
+  .heart { font-size: 10px; line-height: 1; }
+  .heart.full  { color: var(--red); }
+  .heart.empty { color: #333; }
+  .hud-items { font-size: 7px; color: #ccc; display: flex; gap: 10px; }
+  .hud-score { font-size: 8px; color: var(--gold); }
+  .hud-sep { width: 2px; background: #333; align-self: stretch; margin: 0 4px; }
+  #statusMsg { font-size: 9px; color: #0f0; margin-left: auto; }
+
+  /* ── CANVAS ── */
+  #gameWrap {
+    position: relative; width: 100%; max-width: 1024px;
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100%; image-rendering: pixelated; }
+
+  /* ── OVERLAY MESSAGES ── */
+  #overlay {
+    display: none; position: absolute; inset: 0;
+    background: rgba(0,0,0,.7);
+    align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+  }
+  #overlay.visible { display: flex; }
+  #overlayTitle { font-size: clamp(12px, 3vw, 22px); color: var(--gold); text-shadow: 2px 2px 0 #000; text-align: center; }
+  #overlayMsg   { font-size: 9px; color: #ccc; text-align: center; line-height: 2; }
+
+  /* ── MOBILE DPAD ── */
+  #mobileControls {
+    display: none;
+    position: fixed; bottom: 20px; left: 0; right: 0;
+    justify-content: space-between; padding: 0 20px; pointer-events: none;
+  }
+  @media (max-width: 700px) { #mobileControls { display: flex; } }
+  .dpad { position: relative; width: 120px; height: 120px; pointer-events: all; }
+  .dpad-btn {
+    position: absolute; width: 40px; height: 40px;
+    background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; user-select: none; touch-action: none;
+  }
+  .dpad-btn.up    { top: 0;   left: 40px; }
+  .dpad-btn.down  { bottom: 0; left: 40px; }
+  .dpad-btn.left  { top: 40px; left: 0; }
+  .dpad-btn.right { top: 40px; right: 0; }
+  .action-btns { display: flex; gap: 10px; align-items: flex-end; pointer-events: all; }
+  .act-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.4);
+    background: rgba(255,255,255,.15);
+    font-family: 'Press Start 2P', monospace; font-size: 7px; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; touch-action: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="titleScreen">
+  <div class="title-tri">△△△</div>
+  <div class="title-logo">
+    THE LEGEND OF<br>
+    <span style="font-size:1.3em; color:#fff">PATSY</span><br>
+    <span class="sub">Online Multiplayer Clone</span>
+  </div>
+  <input class="name-input" id="playerName" maxlength="12" placeholder="ENTER YOUR NAME" />
+  <div class="btn-row">
+    <button class="btn" onclick="startGame('solo')">▶ 1 PLAYER</button>
+    <button class="btn" onclick="startGame('multi')">▶ 2 PLAYERS (ONLINE)</button>
+  </div>
+  <div class="controls-hint">
+    MOVE: WASD / ARROW KEYS &nbsp;|&nbsp; SWORD: SPACE / Z<br>
+    ARROW: X / J &nbsp;|&nbsp; BOMB: C / K &nbsp;|&nbsp; RESPAWN: R
+  </div>
+</div>
+
+<!-- WAITING SCREEN -->
+<div id="waitScreen">
+  <div class="wait-text">WAITING FOR<br>SECOND PLAYER…</div>
+  <div class="spinner"></div>
+  <div style="font-size:7px;color:#666">Game will start solo if no one joins</div>
+</div>
+
+<!-- HUD -->
+<div id="hud" style="display:none">
+  <div class="hud-player" id="hudP1">
+    <div class="hud-name" id="nameP1">PLAYER 1</div>
+    <div class="hud-hearts" id="heartsP1"></div>
+    <div class="hud-items" id="itemsP1">💣 0 &nbsp; 🏹 0</div>
+    <div class="hud-score" id="scoreP1">0 PTS</div>
+  </div>
+  <div class="hud-sep"></div>
+  <div class="hud-player" id="hudP2" style="display:none">
+    <div class="hud-name" id="nameP2">PLAYER 2</div>
+    <div class="hud-hearts" id="heartsP2"></div>
+    <div class="hud-items" id="itemsP2">💣 0 &nbsp; 🏹 0</div>
+    <div class="hud-score" id="scoreP2">0 PTS</div>
+  </div>
+  <div id="statusMsg"></div>
+</div>
+
+<!-- CANVAS -->
+<div id="gameWrap" style="display:none">
+  <canvas id="canvas"></canvas>
+  <div id="overlay">
+    <div id="overlayTitle"></div>
+    <div id="overlayMsg"></div>
+  </div>
+</div>
+
+<!-- MOBILE CONTROLS -->
+<div id="mobileControls">
+  <div class="dpad">
+    <div class="dpad-btn up"    data-key="up">▲</div>
+    <div class="dpad-btn down"  data-key="down">▼</div>
+    <div class="dpad-btn left"  data-key="left">◀</div>
+    <div class="dpad-btn right" data-key="right">▶</div>
+  </div>
+  <div class="action-btns">
+    <div class="act-btn" data-key="bomb">💣</div>
+    <div class="act-btn" data-key="shootArrow">🏹</div>
+    <div class="act-btn" data-key="sword">⚔</div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ── Constants ──────────────────────────────────────────────
+const TILE = 32;
+const MAP_W = 32, MAP_H = 24;
+
+// Tile colors
+const TILE_COLORS = { 0: '#3a7d44', 1: '#555566', 2: '#2255aa', 3: '#c8a84b' };
+const TILE_DECOR  = { 0: ['#2d6637','#4a9455'], 1: ['#44445a','#666678'], 2: ['#1a4488','#3377cc'], 3: ['#b89040','#d4b860'] };
+
+// Player colors
+const PLAYER_COLORS = ['#22cc55','#3366ff','#ff4422','#ffcc00'];
+const PLAYER_TRIM   = ['#115522','#112266','#661100','#664400'];
+
+// ── State ──────────────────────────────────────────────────
+let socket, myId, gameMap, myMode;
+const gameState = { players: [], enemies: [], arrows: [], items: [], allClear: false };
+const explosions = [];
+const bombs = [];
+const keys = { up:false, down:false, left:false, right:false, sword:false, shootArrow:false, bomb:false };
+let lastInput = {};
+let animFrame = 0;
+let canvas, ctx;
+let camX = 0, camY = 0;
+let particles = [];
+
+// ── Title screen ───────────────────────────────────────────
+function startGame(mode) {
+  myMode = mode;
+  const name = document.getElementById('playerName').value.trim() || 'HERO';
+  document.getElementById('titleScreen').style.display = 'none';
+
+  socket = io();
+
+  socket.on('joined', onJoined);
+  socket.on('gameStart', onGameStart);
+  socket.on('state', onState);
+  socket.on('explosion', onExplosion);
+  socket.on('bombPlaced', onBombPlaced);
+  socket.on('playerLeft', data => { showStatus('Partner disconnected'); });
+
+  socket.emit('join', { name, mode });
+}
+
+function onJoined(data) {
+  myId   = data.playerId;
+  gameMap = data.map;
+
+  document.getElementById('hud').style.display      = 'flex';
+  document.getElementById('gameWrap').style.display = 'block';
+
+  canvas = document.getElementById('canvas');
+  canvas.width  = MAP_W * TILE;
+  canvas.height = MAP_H * TILE;
+  ctx = canvas.getContext('2d');
+
+  if (data.waiting) {
+    document.getElementById('waitScreen').classList.add('visible');
+  }
+  if (mode === 'solo' || !data.waiting) startLoop();
+}
+
+function onGameStart(data) {
+  document.getElementById('waitScreen').classList.remove('visible');
+  if (data.playerCount === 2) document.getElementById('hudP2').style.display = 'flex';
+  startLoop();
+}
+
+function onState(state) {
+  Object.assign(gameState, state);
+  updateHUD(state);
+
+  // show overlay
+  const me = state.players.find(p => p.id === myId);
+  if (me && me.dead) {
+    showOverlay('💀 YOU DIED', 'Press R to respawn');
+  } else if (state.allClear) {
+    showOverlay('⚔ DUNGEON CLEAR!', 'All enemies defeated!\nScores frozen.');
+  } else {
+    hideOverlay();
+  }
+}
+
+function onExplosion(data) {
+  explosions.push({ x: data.x, y: data.y, r: 0, life: 600 });
+  for (let i = 0; i < 20; i++) {
+    const a = Math.random()*Math.PI*2;
+    particles.push({ x: data.x, y: data.y, vx: Math.cos(a)*3, vy: Math.sin(a)*3, life: 500, color: Math.random()>.5?'#ff8800':'#ffdd00' });
+  }
+}
+
+function onBombPlaced(data) {
+  bombs.push({ x: data.x, y: data.y, timer: 1500 });
+}
+
+// ── Main loop ──────────────────────────────────────────────
+let loopStarted = false;
+function startLoop() {
+  if (loopStarted) return;
+  loopStarted = true;
+  setInterval(sendInput, 50);
+  requestAnimationFrame(render);
+}
+
+function sendInput() {
+  const inp = { ...keys };
+  const changed = JSON.stringify(inp) !== JSON.stringify(lastInput);
+  if (changed || inp.sword || inp.shootArrow || inp.bomb) {
+    socket?.emit('input', inp);
+    lastInput = { ...inp };
+  }
+  // consume one-shot actions
+  keys.sword = false;
+  keys.shootArrow = false;
+  keys.bomb = false;
+}
+
+// ── Render ─────────────────────────────────────────────────
+function render(ts) {
+  animFrame = Math.floor(ts / 200) % 4;
+  if (!ctx) { requestAnimationFrame(render); return; }
+
+  // camera follows my player
+  const me = gameState.players.find(p => p.id === myId);
+  if (me) {
+    const targetX = me.x - canvas.width/2;
+    const targetY = me.y - canvas.height/2;
+    camX += (targetX - camX) * 0.12;
+    camY += (targetY - camY) * 0.12;
+    camX = Math.max(0, Math.min(MAP_W*TILE - canvas.width,  camX));
+    camY = Math.max(0, Math.min(MAP_H*TILE - canvas.height, camY));
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(-Math.round(camX), -Math.round(camY));
+
+  drawMap();
+  drawItems();
+  drawBombs(ts);
+  drawEnemies();
+  drawArrows();
+  drawPlayers();
+  drawExplosions(ts);
+  drawParticles(ts);
+
+  ctx.restore();
+  requestAnimationFrame(render);
+}
+
+function drawMap() {
+  const startX = Math.floor(camX/TILE), endX = Math.min(MAP_W, startX + Math.ceil(canvas.width/TILE) + 2);
+  const startY = Math.floor(camY/TILE), endY = Math.min(MAP_H, startY + Math.ceil(canvas.height/TILE) + 2);
+
+  for (let y = startY; y < endY; y++) {
+    for (let x = startX; x < endX; x++) {
+      const t = gameMap[y][x];
+      const px = x*TILE, py = y*TILE;
+      ctx.fillStyle = TILE_COLORS[t] || '#3a7d44';
+      ctx.fillRect(px, py, TILE, TILE);
+
+      // subtle variation
+      if ((x+y)%3===0) {
+        ctx.fillStyle = TILE_DECOR[t]?.[0] || '#2d6637';
+        ctx.fillRect(px+2, py+2, 4, 4);
+      }
+      if ((x*3+y*2)%7===0) {
+        ctx.fillStyle = TILE_DECOR[t]?.[1] || '#4a9455';
+        ctx.fillRect(px+20, py+14, 3, 5);
+      }
+
+      // wall shading
+      if (t === 1) {
+        ctx.fillStyle = 'rgba(0,0,0,.3)';
+        ctx.fillRect(px, py+TILE-4, TILE, 4);
+        ctx.fillStyle = 'rgba(255,255,255,.07)';
+        ctx.fillRect(px, py, TILE, 4);
+      }
+      // water shimmer
+      if (t === 2) {
+        ctx.fillStyle = animFrame%2===0 ? 'rgba(100,180,255,.25)' : 'rgba(50,120,220,.15)';
+        ctx.fillRect(px+4, py+8, TILE-8, 6);
+      }
+    }
+  }
+}
+
+function drawItems() {
+  for (const item of gameState.items) {
+    const bob = Math.sin(Date.now()/400 + item.x) * 2;
+    ctx.save();
+    ctx.translate(item.x + 16, item.y + 16 + bob);
+    if (item.type === 'heart') {
+      ctx.fillStyle = '#ff2244'; ctx.font = '18px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('❤', 0, 0);
+    } else if (item.type === 'bomb') {
+      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 2, 8, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#555'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = '#ff8800'; ctx.fillRect(-1, -10, 3, 6);
+    } else if (item.type === 'arrow') {
+      ctx.fillStyle = '#c8a84b'; ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('↑', 0, 0);
+    }
+    ctx.restore();
+  }
+}
+
+function drawEnemies() {
+  for (const e of gameState.enemies) {
+    if (!e.alive) continue;
+    const px = e.x, py = e.y;
+    const flash = e.hp < e.maxHp && animFrame % 2 === 0;
+
+    ctx.save();
+    ctx.translate(px + 16, py + 16);
+
+    if (e.type === 0) drawOctorok(flash);
+    else if (e.type === 1) drawMoblin(flash);
+    else drawLikeLike(flash);
+
+    // HP bar
+    const bw = 28, bh = 4;
+    ctx.fillStyle = '#300'; ctx.fillRect(-bw/2, -22, bw, bh);
+    ctx.fillStyle = '#f00'; ctx.fillRect(-bw/2, -22, bw * (e.hp/e.maxHp), bh);
+
+    ctx.restore();
+  }
+}
+
+function drawOctorok(flash) {
+  ctx.fillStyle = flash ? '#fff' : '#cc3322';
+  ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#881111';
+  ctx.beginPath(); ctx.arc(-4, -3, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(4, -3, 3, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#ff6655';
+  ctx.beginPath(); ctx.arc(0, 4, 5, 0, Math.PI*2); ctx.fill();
+}
+
+function drawMoblin(flash) {
+  ctx.fillStyle = flash ? '#fff' : '#4466aa';
+  ctx.fillRect(-9, -12, 18, 22);
+  ctx.fillStyle = flash ? '#ddd' : '#88aadd';
+  ctx.fillRect(-7, -16, 14, 10);
+  ctx.fillStyle = '#ffaa44';
+  ctx.fillRect(-2, -14, 4, 8);
+  // spear
+  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(10, -14); ctx.lineTo(10, 14); ctx.stroke();
+  ctx.fillStyle = '#ccc'; ctx.fillRect(8, -18, 4, 6);
+}
+
+function drawLikeLike(flash) {
+  ctx.fillStyle = flash ? '#fff' : '#885522';
+  for (let i = 0; i < 3; i++) {
+    const scale = 1 - i*0.15;
+    ctx.beginPath();
+    ctx.ellipse(0, -6+i*8, 12*scale, 8*scale, 0, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#cc8844';
+  ctx.beginPath(); ctx.arc(0, -2, 6, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#200';
+  ctx.beginPath(); ctx.arc(-2, -3, 2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(2, -3, 2, 0, Math.PI*2); ctx.fill();
+}
+
+function drawArrows() {
+  ctx.strokeStyle = '#c8a84b'; ctx.lineWidth = 2;
+  for (const a of gameState.arrows) {
+    const angle = Math.atan2(a.vy, a.vx);
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(angle);
+    ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+    ctx.fillStyle = '#c8a84b';
+    ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(5, -3); ctx.lineTo(5, 3); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawPlayers() {
+  for (const p of gameState.players) {
+    drawPlayer(p);
+  }
+}
+
+function drawPlayer(p) {
+  const isMe = p.id === myId;
+  const col  = PLAYER_COLORS[p.colorIndex] || '#22cc55';
+  const trim = PLAYER_TRIM[p.colorIndex]   || '#115522';
+
+  ctx.save();
+  ctx.translate(p.x + 8, p.y + 8);
+
+  const flash = p.hitCooldown > 0 && Math.floor(Date.now()/100)%2===0;
+  if (flash) { ctx.globalAlpha = 0.4; }
+  if (p.dead) { ctx.globalAlpha = 0.2; }
+
+  // body
+  ctx.fillStyle = col;
+  ctx.fillRect(-8, -8, 16, 20);
+
+  // tunic
+  ctx.fillStyle = trim;
+  ctx.fillRect(-8, 2, 16, 10);
+
+  // head
+  ctx.fillStyle = '#f4c07c';
+  ctx.fillRect(-6, -16, 12, 12);
+
+  // hat
+  ctx.fillStyle = col;
+  ctx.fillRect(-8, -20, 16, 8);
+  ctx.fillRect(-4, -25, 8, 7);
+
+  // eyes
+  ctx.fillStyle = '#000';
+  if (p.dir !== 'up') {
+    if (p.dir === 'left') {
+      ctx.fillRect(-5, -13, 2, 2);
+    } else if (p.dir === 'right') {
+      ctx.fillRect(3, -13, 2, 2);
+    } else {
+      ctx.fillRect(-4, -13, 2, 2);
+      ctx.fillRect(2, -13, 2, 2);
+    }
+  }
+
+  // sword
+  if (p.sword) {
+    ctx.strokeStyle = '#eee';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    const sx = p.dir==='right'?20:p.dir==='left'?-20:0;
+    const sy = p.dir==='down'?20:p.dir==='up'?-20:0;
+    ctx.moveTo(0, 0); ctx.lineTo(sx, sy);
+    ctx.stroke();
+    ctx.fillStyle = '#aaa';
+    ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI*2); ctx.fill();
+  }
+
+  // name tag
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = isMe ? '#fff' : '#ffdd88';
+  ctx.font = '5px "Press Start 2P"';
+  ctx.textAlign = 'center';
+  ctx.fillText(p.name.substring(0,8), 0, -28);
+
+  ctx.restore();
+}
+
+function drawBombs(ts) {
+  const now = Date.now();
+  for (let i = bombs.length-1; i >= 0; i--) {
+    const b = bombs[i];
+    b.timer -= 16;
+    if (b.timer <= 0) { bombs.splice(i, 1); continue; }
+    const flash = b.timer < 600 && Math.floor(now/100)%2===0;
+    ctx.save();
+    ctx.translate(b.x+8, b.y+8);
+    ctx.fillStyle = flash ? '#ff4400' : '#222';
+    ctx.beginPath(); ctx.arc(0, 2, 8, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#ff8800'; ctx.fillRect(-1, -8, 3, 6);
+    ctx.restore();
+  }
+}
+
+function drawExplosions(ts) {
+  for (let i = explosions.length-1; i >= 0; i--) {
+    const ex = explosions[i];
+    ex.life -= 16; ex.r += 2;
+    if (ex.life <= 0) { explosions.splice(i, 1); continue; }
+    const alpha = ex.life / 600;
+    ctx.save();
+    const grd = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, ex.r);
+    grd.addColorStop(0, `rgba(255,255,200,${alpha})`);
+    grd.addColorStop(0.4, `rgba(255,140,0,${alpha*0.8})`);
+    grd.addColorStop(1, `rgba(200,0,0,0)`);
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(ex.x, ex.y, ex.r, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawParticles(ts) {
+  for (let i = particles.length-1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 16;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    ctx.globalAlpha = p.life / 500;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x-2, p.y-2, 4, 4);
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ── HUD update ─────────────────────────────────────────────
+function updateHUD(state) {
+  let p1, p2;
+  for (const p of state.players) {
+    if (p.id === myId) p1 = p;
+    else p2 = p;
+  }
+  if (!p1) return;
+
+  renderHearts('heartsP1', p1.hp, p1.maxHp);
+  document.getElementById('nameP1').textContent  = p1.name;
+  document.getElementById('itemsP1').textContent = `💣 ${p1.bombs}  🏹 ${p1.arrows}`;
+  document.getElementById('scoreP1').textContent = `${p1.score} PTS`;
+
+  if (p2) {
+    document.getElementById('hudP2').style.display = 'flex';
+    renderHearts('heartsP2', p2.hp, p2.maxHp);
+    document.getElementById('nameP2').textContent  = p2.name;
+    document.getElementById('itemsP2').textContent = `💣 ${p2.bombs}  🏹 ${p2.arrows}`;
+    document.getElementById('scoreP2').textContent = `${p2.score} PTS`;
+  }
+}
+
+function renderHearts(id, hp, maxHp) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  for (let i = 0; i < maxHp; i += 2) {
+    const h = document.createElement('span');
+    h.className = 'heart ' + (i < hp ? 'full' : 'empty');
+    h.textContent = '♥';
+    el.appendChild(h);
+  }
+}
+
+function showStatus(msg) { document.getElementById('statusMsg').textContent = msg; }
+
+function showOverlay(title, msg) {
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlayMsg').textContent   = msg;
+  document.getElementById('overlay').classList.add('visible');
+}
+function hideOverlay() { document.getElementById('overlay').classList.remove('visible'); }
+
+// ── Keyboard ───────────────────────────────────────────────
+const KEY_MAP = {
+  ArrowUp:'up', ArrowDown:'down', ArrowLeft:'left', ArrowRight:'right',
+  w:'up', s:'down', a:'left', d:'right',
+  ' ':'sword', z:'sword', Z:'sword',
+  x:'shootArrow', X:'shootArrow', j:'shootArrow', J:'shootArrow',
+  c:'bomb', C:'bomb', k:'bomb', K:'bomb',
+};
+
+document.addEventListener('keydown', e => {
+  const k = KEY_MAP[e.key];
+  if (k) { keys[k] = true; e.preventDefault(); }
+  if (e.key === 'r' || e.key === 'R') socket?.emit('respawn');
+});
+document.addEventListener('keyup', e => {
+  const k = KEY_MAP[e.key];
+  if (k && !['sword','shootArrow','bomb'].includes(k)) keys[k] = false;
+});
+
+// ── Mobile controls ────────────────────────────────────────
+document.querySelectorAll('.dpad-btn, .act-btn').forEach(btn => {
+  const k = btn.dataset.key;
+  btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; });
+  btn.addEventListener('touchend',   e => { e.preventDefault(); keys[k] = false; });
+});
+</script>
+</body>
+</html>
