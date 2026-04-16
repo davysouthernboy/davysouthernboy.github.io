@@ -104,7 +104,7 @@
   }
   #overlay.visible { display: flex; }
   #overlayTitle { font-size: clamp(12px, 3vw, 22px); color: var(--gold); text-shadow: 2px 2px 0 #000; text-align: center; }
-  #overlayMsg   { font-size: 9px; color: #ccc; text-align: center; line-height: 2; }
+  #overlayMsg   { font-size: 9px; color: #ccc; text-align: center; line-height: 2; white-space: pre-line; }
 
   /* ── MOBILE DPAD ── */
   #mobileControls {
@@ -205,11 +205,14 @@
   </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 // ── Constants ──────────────────────────────────────────────
 const TILE = 32;
 const MAP_W = 32, MAP_H = 24;
+
+// Replace this with your actual Railway domain
+const SERVER_URL = 'davysouthernboygithubio-production.up.railway.app';
 
 // Tile colors
 const TILE_COLORS = { 0: '#3a7d44', 1: '#555566', 2: '#2255aa', 3: '#c8a84b' };
@@ -220,7 +223,11 @@ const PLAYER_COLORS = ['#22cc55','#3366ff','#ff4422','#ffcc00'];
 const PLAYER_TRIM   = ['#115522','#112266','#661100','#664400'];
 
 // ── State ──────────────────────────────────────────────────
-let socket, myId, gameMap, myMode;
+let socket = null;
+let myId = null;
+let gameMap = null;
+let myMode = null;
+
 const gameState = { players: [], enemies: [], arrows: [], items: [], allClear: false };
 const explosions = [];
 const bombs = [];
@@ -230,6 +237,7 @@ let animFrame = 0;
 let canvas, ctx;
 let camX = 0, camY = 0;
 let particles = [];
+let loopStarted = false;
 
 // ── Title screen ───────────────────────────────────────────
 function startGame(mode) {
@@ -237,39 +245,70 @@ function startGame(mode) {
   const name = document.getElementById('playerName').value.trim() || 'HERO';
   document.getElementById('titleScreen').style.display = 'none';
 
-  socket = io();
+  socket = io(SERVER_URL, {
+    transports: ['websocket', 'polling']
+  });
+
+  socket.on('connect', () => {
+    console.log('Connected to server:', socket.id);
+    showStatus('Connected');
+  });
+
+  socket.on('connect_error', (err) => {
+    console.error('Connection error:', err);
+    showOverlay('CONNECTION ERROR', 'Could not connect to multiplayer server.');
+    showStatus('Connection failed');
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.warn('Disconnected:', reason);
+    showStatus('Disconnected from server');
+  });
 
   socket.on('joined', onJoined);
   socket.on('gameStart', onGameStart);
   socket.on('state', onState);
   socket.on('explosion', onExplosion);
   socket.on('bombPlaced', onBombPlaced);
-  socket.on('playerLeft', data => { showStatus('Partner disconnected'); });
+  socket.on('playerLeft', () => {
+    showStatus('Partner disconnected');
+  });
 
   socket.emit('join', { name, mode });
 }
 
 function onJoined(data) {
-  myId   = data.playerId;
+  myId = data.playerId;
   gameMap = data.map;
 
-  document.getElementById('hud').style.display      = 'flex';
+  document.getElementById('hud').style.display = 'flex';
   document.getElementById('gameWrap').style.display = 'block';
 
   canvas = document.getElementById('canvas');
-  canvas.width  = MAP_W * TILE;
+  canvas.width = MAP_W * TILE;
   canvas.height = MAP_H * TILE;
   ctx = canvas.getContext('2d');
 
   if (data.waiting) {
     document.getElementById('waitScreen').classList.add('visible');
+    showStatus('Waiting for player 2...');
+  } else {
+    showStatus(myMode === 'solo' ? 'Solo mode' : 'Ready');
   }
-  if (mode === 'solo' || !data.waiting) startLoop();
+
+  if (myMode === 'solo' || !data.waiting) {
+    startLoop();
+  }
 }
 
 function onGameStart(data) {
   document.getElementById('waitScreen').classList.remove('visible');
-  if (data.playerCount === 2) document.getElementById('hudP2').style.display = 'flex';
+  if (data.playerCount === 2) {
+    document.getElementById('hudP2').style.display = 'flex';
+    showStatus('2 players connected');
+  } else {
+    showStatus('Game started');
+  }
   startLoop();
 }
 
@@ -277,7 +316,6 @@ function onState(state) {
   Object.assign(gameState, state);
   updateHUD(state);
 
-  // show overlay
   const me = state.players.find(p => p.id === myId);
   if (me && me.dead) {
     showOverlay('💀 YOU DIED', 'Press R to respawn');
@@ -291,8 +329,15 @@ function onState(state) {
 function onExplosion(data) {
   explosions.push({ x: data.x, y: data.y, r: 0, life: 600 });
   for (let i = 0; i < 20; i++) {
-    const a = Math.random()*Math.PI*2;
-    particles.push({ x: data.x, y: data.y, vx: Math.cos(a)*3, vy: Math.sin(a)*3, life: 500, color: Math.random()>.5?'#ff8800':'#ffdd00' });
+    const a = Math.random() * Math.PI * 2;
+    particles.push({
+      x: data.x,
+      y: data.y,
+      vx: Math.cos(a) * 3,
+      vy: Math.sin(a) * 3,
+      life: 500,
+      color: Math.random() > 0.5 ? '#ff8800' : '#ffdd00'
+    });
   }
 }
 
@@ -301,7 +346,6 @@ function onBombPlaced(data) {
 }
 
 // ── Main loop ──────────────────────────────────────────────
-let loopStarted = false;
 function startLoop() {
   if (loopStarted) return;
   loopStarted = true;
@@ -312,10 +356,12 @@ function startLoop() {
 function sendInput() {
   const inp = { ...keys };
   const changed = JSON.stringify(inp) !== JSON.stringify(lastInput);
+
   if (changed || inp.sword || inp.shootArrow || inp.bomb) {
     socket?.emit('input', inp);
     lastInput = { ...inp };
   }
+
   // consume one-shot actions
   keys.sword = false;
   keys.shootArrow = false;
@@ -325,17 +371,20 @@ function sendInput() {
 // ── Render ─────────────────────────────────────────────────
 function render(ts) {
   animFrame = Math.floor(ts / 200) % 4;
-  if (!ctx) { requestAnimationFrame(render); return; }
+  if (!ctx || !gameMap) {
+    requestAnimationFrame(render);
+    return;
+  }
 
   // camera follows my player
   const me = gameState.players.find(p => p.id === myId);
   if (me) {
-    const targetX = me.x - canvas.width/2;
-    const targetY = me.y - canvas.height/2;
+    const targetX = me.x - canvas.width / 2;
+    const targetY = me.y - canvas.height / 2;
     camX += (targetX - camX) * 0.12;
     camY += (targetY - camY) * 0.12;
-    camX = Math.max(0, Math.min(MAP_W*TILE - canvas.width,  camX));
-    camY = Math.max(0, Math.min(MAP_H*TILE - canvas.height, camY));
+    camX = Math.max(0, Math.min(MAP_W * TILE - canvas.width, camX));
+    camY = Math.max(0, Math.min(MAP_H * TILE - canvas.height, camY));
   }
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -344,49 +393,49 @@ function render(ts) {
 
   drawMap();
   drawItems();
-  drawBombs(ts);
+  drawBombs();
   drawEnemies();
   drawArrows();
   drawPlayers();
-  drawExplosions(ts);
-  drawParticles(ts);
+  drawExplosions();
+  drawParticles();
 
   ctx.restore();
   requestAnimationFrame(render);
 }
 
 function drawMap() {
-  const startX = Math.floor(camX/TILE), endX = Math.min(MAP_W, startX + Math.ceil(canvas.width/TILE) + 2);
-  const startY = Math.floor(camY/TILE), endY = Math.min(MAP_H, startY + Math.ceil(canvas.height/TILE) + 2);
+  const startX = Math.floor(camX / TILE);
+  const endX = Math.min(MAP_W, startX + Math.ceil(canvas.width / TILE) + 2);
+  const startY = Math.floor(camY / TILE);
+  const endY = Math.min(MAP_H, startY + Math.ceil(canvas.height / TILE) + 2);
 
   for (let y = startY; y < endY; y++) {
     for (let x = startX; x < endX; x++) {
       const t = gameMap[y][x];
-      const px = x*TILE, py = y*TILE;
+      const px = x * TILE, py = y * TILE;
       ctx.fillStyle = TILE_COLORS[t] || '#3a7d44';
       ctx.fillRect(px, py, TILE, TILE);
 
-      // subtle variation
-      if ((x+y)%3===0) {
+      if ((x + y) % 3 === 0) {
         ctx.fillStyle = TILE_DECOR[t]?.[0] || '#2d6637';
-        ctx.fillRect(px+2, py+2, 4, 4);
+        ctx.fillRect(px + 2, py + 2, 4, 4);
       }
-      if ((x*3+y*2)%7===0) {
+      if ((x * 3 + y * 2) % 7 === 0) {
         ctx.fillStyle = TILE_DECOR[t]?.[1] || '#4a9455';
-        ctx.fillRect(px+20, py+14, 3, 5);
+        ctx.fillRect(px + 20, py + 14, 3, 5);
       }
 
-      // wall shading
       if (t === 1) {
         ctx.fillStyle = 'rgba(0,0,0,.3)';
-        ctx.fillRect(px, py+TILE-4, TILE, 4);
+        ctx.fillRect(px, py + TILE - 4, TILE, 4);
         ctx.fillStyle = 'rgba(255,255,255,.07)';
         ctx.fillRect(px, py, TILE, 4);
       }
-      // water shimmer
+
       if (t === 2) {
-        ctx.fillStyle = animFrame%2===0 ? 'rgba(100,180,255,.25)' : 'rgba(50,120,220,.15)';
-        ctx.fillRect(px+4, py+8, TILE-8, 6);
+        ctx.fillStyle = animFrame % 2 === 0 ? 'rgba(100,180,255,.25)' : 'rgba(50,120,220,.15)';
+        ctx.fillRect(px + 4, py + 8, TILE - 8, 6);
       }
     }
   }
@@ -394,20 +443,34 @@ function drawMap() {
 
 function drawItems() {
   for (const item of gameState.items) {
-    const bob = Math.sin(Date.now()/400 + item.x) * 2;
+    const bob = Math.sin(Date.now() / 400 + item.x) * 2;
     ctx.save();
     ctx.translate(item.x + 16, item.y + 16 + bob);
+
     if (item.type === 'heart') {
-      ctx.fillStyle = '#ff2244'; ctx.font = '18px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ff2244';
+      ctx.font = '18px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillText('❤', 0, 0);
     } else if (item.type === 'bomb') {
-      ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(0, 2, 8, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#555'; ctx.lineWidth = 1; ctx.stroke();
-      ctx.fillStyle = '#ff8800'; ctx.fillRect(-1, -10, 3, 6);
+      ctx.fillStyle = '#222';
+      ctx.beginPath();
+      ctx.arc(0, 2, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#555';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = '#ff8800';
+      ctx.fillRect(-1, -10, 3, 6);
     } else if (item.type === 'arrow') {
-      ctx.fillStyle = '#c8a84b'; ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#c8a84b';
+      ctx.font = '16px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
       ctx.fillText('↑', 0, 0);
     }
+
     ctx.restore();
   }
 }
@@ -425,10 +488,11 @@ function drawEnemies() {
     else if (e.type === 1) drawMoblin(flash);
     else drawLikeLike(flash);
 
-    // HP bar
     const bw = 28, bh = 4;
-    ctx.fillStyle = '#300'; ctx.fillRect(-bw/2, -22, bw, bh);
-    ctx.fillStyle = '#f00'; ctx.fillRect(-bw/2, -22, bw * (e.hp/e.maxHp), bh);
+    ctx.fillStyle = '#300';
+    ctx.fillRect(-bw / 2, -22, bw, bh);
+    ctx.fillStyle = '#f00';
+    ctx.fillRect(-bw / 2, -22, bw * (e.hp / e.maxHp), bh);
 
     ctx.restore();
   }
@@ -436,12 +500,20 @@ function drawEnemies() {
 
 function drawOctorok(flash) {
   ctx.fillStyle = flash ? '#fff' : '#cc3322';
-  ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, 0, 12, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#881111';
-  ctx.beginPath(); ctx.arc(-4, -3, 3, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(4, -3, 3, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-4, -3, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(4, -3, 3, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#ff6655';
-  ctx.beginPath(); ctx.arc(0, 4, 5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, 4, 5, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawMoblin(flash) {
@@ -451,35 +523,56 @@ function drawMoblin(flash) {
   ctx.fillRect(-7, -16, 14, 10);
   ctx.fillStyle = '#ffaa44';
   ctx.fillRect(-2, -14, 4, 8);
-  // spear
-  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(10, -14); ctx.lineTo(10, 14); ctx.stroke();
-  ctx.fillStyle = '#ccc'; ctx.fillRect(8, -18, 4, 6);
+  ctx.strokeStyle = '#aaa';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(10, -14);
+  ctx.lineTo(10, 14);
+  ctx.stroke();
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(8, -18, 4, 6);
 }
 
 function drawLikeLike(flash) {
   ctx.fillStyle = flash ? '#fff' : '#885522';
   for (let i = 0; i < 3; i++) {
-    const scale = 1 - i*0.15;
+    const scale = 1 - i * 0.15;
     ctx.beginPath();
-    ctx.ellipse(0, -6+i*8, 12*scale, 8*scale, 0, 0, Math.PI*2);
+    ctx.ellipse(0, -6 + i * 8, 12 * scale, 8 * scale, 0, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.fillStyle = '#cc8844';
-  ctx.beginPath(); ctx.arc(0, -2, 6, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0, -2, 6, 0, Math.PI * 2);
+  ctx.fill();
   ctx.fillStyle = '#200';
-  ctx.beginPath(); ctx.arc(-2, -3, 2, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(2, -3, 2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-2, -3, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(2, -3, 2, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawArrows() {
-  ctx.strokeStyle = '#c8a84b'; ctx.lineWidth = 2;
+  ctx.strokeStyle = '#c8a84b';
+  ctx.lineWidth = 2;
   for (const a of gameState.arrows) {
     const angle = Math.atan2(a.vy, a.vx);
-    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(angle);
-    ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.stroke();
+    ctx.save();
+    ctx.translate(a.x, a.y);
+    ctx.rotate(angle);
+    ctx.beginPath();
+    ctx.moveTo(-10, 0);
+    ctx.lineTo(10, 0);
+    ctx.stroke();
     ctx.fillStyle = '#c8a84b';
-    ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(5, -3); ctx.lineTo(5, 3); ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(10, 0);
+    ctx.lineTo(5, -3);
+    ctx.lineTo(5, 3);
+    ctx.closePath();
+    ctx.fill();
     ctx.restore();
   }
 }
@@ -492,34 +585,29 @@ function drawPlayers() {
 
 function drawPlayer(p) {
   const isMe = p.id === myId;
-  const col  = PLAYER_COLORS[p.colorIndex] || '#22cc55';
-  const trim = PLAYER_TRIM[p.colorIndex]   || '#115522';
+  const col = PLAYER_COLORS[p.colorIndex] || '#22cc55';
+  const trim = PLAYER_TRIM[p.colorIndex] || '#115522';
 
   ctx.save();
   ctx.translate(p.x + 8, p.y + 8);
 
-  const flash = p.hitCooldown > 0 && Math.floor(Date.now()/100)%2===0;
-  if (flash) { ctx.globalAlpha = 0.4; }
-  if (p.dead) { ctx.globalAlpha = 0.2; }
+  const flash = p.hitCooldown > 0 && Math.floor(Date.now() / 100) % 2 === 0;
+  if (flash) ctx.globalAlpha = 0.4;
+  if (p.dead) ctx.globalAlpha = 0.2;
 
-  // body
   ctx.fillStyle = col;
   ctx.fillRect(-8, -8, 16, 20);
 
-  // tunic
   ctx.fillStyle = trim;
   ctx.fillRect(-8, 2, 16, 10);
 
-  // head
   ctx.fillStyle = '#f4c07c';
   ctx.fillRect(-6, -16, 12, 12);
 
-  // hat
   ctx.fillStyle = col;
   ctx.fillRect(-8, -20, 16, 8);
   ctx.fillRect(-4, -25, 8, 7);
 
-  // eyes
   ctx.fillStyle = '#000';
   if (p.dir !== 'up') {
     if (p.dir === 'left') {
@@ -532,70 +620,89 @@ function drawPlayer(p) {
     }
   }
 
-  // sword
   if (p.sword) {
     ctx.strokeStyle = '#eee';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    const sx = p.dir==='right'?20:p.dir==='left'?-20:0;
-    const sy = p.dir==='down'?20:p.dir==='up'?-20:0;
-    ctx.moveTo(0, 0); ctx.lineTo(sx, sy);
+    const sx = p.dir === 'right' ? 20 : p.dir === 'left' ? -20 : 0;
+    const sy = p.dir === 'down' ? 20 : p.dir === 'up' ? -20 : 0;
+    ctx.moveTo(0, 0);
+    ctx.lineTo(sx, sy);
     ctx.stroke();
     ctx.fillStyle = '#aaa';
-    ctx.beginPath(); ctx.arc(sx, sy, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  // name tag
   ctx.globalAlpha = 1;
   ctx.fillStyle = isMe ? '#fff' : '#ffdd88';
   ctx.font = '5px "Press Start 2P"';
   ctx.textAlign = 'center';
-  ctx.fillText(p.name.substring(0,8), 0, -28);
+  ctx.fillText(p.name.substring(0, 8), 0, -28);
 
   ctx.restore();
 }
 
-function drawBombs(ts) {
+function drawBombs() {
   const now = Date.now();
-  for (let i = bombs.length-1; i >= 0; i--) {
+  for (let i = bombs.length - 1; i >= 0; i--) {
     const b = bombs[i];
     b.timer -= 16;
-    if (b.timer <= 0) { bombs.splice(i, 1); continue; }
-    const flash = b.timer < 600 && Math.floor(now/100)%2===0;
+    if (b.timer <= 0) {
+      bombs.splice(i, 1);
+      continue;
+    }
+    const flash = b.timer < 600 && Math.floor(now / 100) % 2 === 0;
     ctx.save();
-    ctx.translate(b.x+8, b.y+8);
+    ctx.translate(b.x + 8, b.y + 8);
     ctx.fillStyle = flash ? '#ff4400' : '#222';
-    ctx.beginPath(); ctx.arc(0, 2, 8, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#ff8800'; ctx.fillRect(-1, -8, 3, 6);
+    ctx.beginPath();
+    ctx.arc(0, 2, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff8800';
+    ctx.fillRect(-1, -8, 3, 6);
     ctx.restore();
   }
 }
 
-function drawExplosions(ts) {
-  for (let i = explosions.length-1; i >= 0; i--) {
+function drawExplosions() {
+  for (let i = explosions.length - 1; i >= 0; i--) {
     const ex = explosions[i];
-    ex.life -= 16; ex.r += 2;
-    if (ex.life <= 0) { explosions.splice(i, 1); continue; }
+    ex.life -= 16;
+    ex.r += 2;
+    if (ex.life <= 0) {
+      explosions.splice(i, 1);
+      continue;
+    }
     const alpha = ex.life / 600;
     ctx.save();
     const grd = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, ex.r);
     grd.addColorStop(0, `rgba(255,255,200,${alpha})`);
-    grd.addColorStop(0.4, `rgba(255,140,0,${alpha*0.8})`);
+    grd.addColorStop(0.4, `rgba(255,140,0,${alpha * 0.8})`);
     grd.addColorStop(1, `rgba(200,0,0,0)`);
     ctx.fillStyle = grd;
-    ctx.beginPath(); ctx.arc(ex.x, ex.y, ex.r, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath();
+    ctx.arc(ex.x, ex.y, ex.r, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 }
 
-function drawParticles(ts) {
-  for (let i = particles.length-1; i >= 0; i--) {
+function drawParticles() {
+  for (let i = particles.length - 1; i >= 0; i--) {
     const p = particles[i];
-    p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life -= 16;
-    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.1;
+    p.life -= 16;
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
     ctx.globalAlpha = p.life / 500;
     ctx.fillStyle = p.color;
-    ctx.fillRect(p.x-2, p.y-2, 4, 4);
+    ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
     ctx.globalAlpha = 1;
   }
 }
@@ -610,14 +717,14 @@ function updateHUD(state) {
   if (!p1) return;
 
   renderHearts('heartsP1', p1.hp, p1.maxHp);
-  document.getElementById('nameP1').textContent  = p1.name;
+  document.getElementById('nameP1').textContent = p1.name;
   document.getElementById('itemsP1').textContent = `💣 ${p1.bombs}  🏹 ${p1.arrows}`;
   document.getElementById('scoreP1').textContent = `${p1.score} PTS`;
 
   if (p2) {
     document.getElementById('hudP2').style.display = 'flex';
     renderHearts('heartsP2', p2.hp, p2.maxHp);
-    document.getElementById('nameP2').textContent  = p2.name;
+    document.getElementById('nameP2').textContent = p2.name;
     document.getElementById('itemsP2').textContent = `💣 ${p2.bombs}  🏹 ${p2.arrows}`;
     document.getElementById('scoreP2').textContent = `${p2.score} PTS`;
   }
@@ -634,14 +741,19 @@ function renderHearts(id, hp, maxHp) {
   }
 }
 
-function showStatus(msg) { document.getElementById('statusMsg').textContent = msg; }
+function showStatus(msg) {
+  document.getElementById('statusMsg').textContent = msg;
+}
 
 function showOverlay(title, msg) {
   document.getElementById('overlayTitle').textContent = title;
-  document.getElementById('overlayMsg').textContent   = msg;
+  document.getElementById('overlayMsg').textContent = msg;
   document.getElementById('overlay').classList.add('visible');
 }
-function hideOverlay() { document.getElementById('overlay').classList.remove('visible'); }
+
+function hideOverlay() {
+  document.getElementById('overlay').classList.remove('visible');
+}
 
 // ── Keyboard ───────────────────────────────────────────────
 const KEY_MAP = {
@@ -654,9 +766,13 @@ const KEY_MAP = {
 
 document.addEventListener('keydown', e => {
   const k = KEY_MAP[e.key];
-  if (k) { keys[k] = true; e.preventDefault(); }
+  if (k) {
+    keys[k] = true;
+    e.preventDefault();
+  }
   if (e.key === 'r' || e.key === 'R') socket?.emit('respawn');
 });
+
 document.addEventListener('keyup', e => {
   const k = KEY_MAP[e.key];
   if (k && !['sword','shootArrow','bomb'].includes(k)) keys[k] = false;
@@ -665,8 +781,25 @@ document.addEventListener('keyup', e => {
 // ── Mobile controls ────────────────────────────────────────
 document.querySelectorAll('.dpad-btn, .act-btn').forEach(btn => {
   const k = btn.dataset.key;
-  btn.addEventListener('touchstart', e => { e.preventDefault(); keys[k] = true; });
-  btn.addEventListener('touchend',   e => { e.preventDefault(); keys[k] = false; });
+
+  btn.addEventListener('touchstart', e => {
+    e.preventDefault();
+    keys[k] = true;
+  }, { passive: false });
+
+  btn.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (!['sword', 'shootArrow', 'bomb'].includes(k)) {
+      keys[k] = false;
+    }
+  }, { passive: false });
+
+  btn.addEventListener('touchcancel', e => {
+    e.preventDefault();
+    if (!['sword', 'shootArrow', 'bomb'].includes(k)) {
+      keys[k] = false;
+    }
+  }, { passive: false });
 });
 </script>
 </body>
