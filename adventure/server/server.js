@@ -14,7 +14,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: 'davysouthernboygithubio-production.up.railway.app',
+    origin: 'https://davysouthernboygithubio-production.up.railway.app',
     methods: ['GET', 'POST']
   }
 });
