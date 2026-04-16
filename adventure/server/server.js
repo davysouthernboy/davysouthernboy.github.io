@@ -14,7 +14,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: 'https://davysouthernboy-github-io.railway.internal',
+    origin: 'davysouthernboygithubio-production.up.railway.app',
     methods: ['GET', 'POST']
   }
 });
