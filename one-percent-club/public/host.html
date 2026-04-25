@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<title>Host · The 1% Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,600;1,9..144,900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-2: #141420;
+    --bg-3: #1f1f30;
+    --ink: #f5f5f0;
+    --ink-dim: #8a8a95;
+    --accent: #e8d040;
+    --accent-2: #ff4466;
+    --green: #4ade80;
+    --red: #ef4444;
+    --border: #26263a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Fraunces', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232, 208, 64, 0.12), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 68, 102, 0.08), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; opacity: 0.3; z-index: 1000;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Home screen (pick game) ---------- */
+  #home {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+  #home h1 {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
+    margin-bottom: 0.5rem;
+  }
+  #home .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 3rem;
+  }
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    max-width: 920px;
+    width: 100%;
+  }
+  .game-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    cursor: pointer;
+    transition: transform 150ms, border-color 150ms;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .game-card.available { border-color: rgba(232, 208, 64, 0.3); }
+  .game-card.available:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 20px 60px rgba(232, 208, 64, 0.15);
+  }
+  .game-card.coming-soon { opacity: 0.45; cursor: not-allowed; }
+  .game-card .title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.5rem;
+  }
+  .game-card .desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-dim);
+    line-height: 1.5;
+  }
+  .game-card .badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.55rem;
+    border-radius: 100px;
+  }
+  .badge.live { background: var(--green); color: #0a1a0a; }
+  .badge.soon { background: var(--bg-3); color: var(--ink-dim); }
+
+  /* ---------- Lobby ---------- */
+  #lobby {
+    display: none;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+  .lobby-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: center;
+    min-height: calc(100vh - 4rem);
+  }
+  @media (max-width: 900px) {
+    .lobby-grid { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  .join-panel {
+    text-align: center;
+  }
+  .join-panel .small {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.75rem;
+  }
+  .room-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(4rem, 12vw, 8rem);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 60px rgba(232, 208, 64, 0.4);
+  }
+  .qr-box {
+    background: white;
+    border-radius: 24px;
+    padding: 1.25rem;
+    display: inline-block;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1.5rem;
+  }
+  .qr-box img { display: block; width: 260px; height: 260px; }
+  .join-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    word-break: break-all;
+  }
+  .players-panel h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    font-style: italic;
+    margin-bottom: 0.25rem;
+  }
+  .players-panel .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 1.5rem;
+  }
+  .players-count {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .players-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+  .player-tag {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    animation: fadeIn 350ms;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .start-btn {
+    background: var(--accent);
+    color: #1a1a0a;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    padding: 1.3rem 2.5rem;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: transform 120ms, box-shadow 120ms;
+    font-style: italic;
+    letter-spacing: -0.01em;
+  }
+  .start-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(232, 208, 64, 0.3); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ---------- Game ---------- */
+  #game { display: none; min-height: 100vh; padding: 1.5rem 2rem; }
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .brand-mini {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-style: italic;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .game-stats {
+    display: flex;
+    gap: 2rem;
+  }
+  .stat {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stat .v {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .l {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-top: 0.35rem;
+  }
+
+  .question-stage {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 3rem 2.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .level-marker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .big-question {
+    font-size: clamp(1.75rem, 4vw, 3rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-bottom: 2rem;
+  }
+  .big-choices {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 700px) {
+    .big-choices { grid-template-columns: 1fr; }
+  }
+  .big-choice {
+    background: var(--bg-3);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 200ms, background 200ms;
+  }
+  .big-choice .big-letter {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .big-choice.correct {
+    border-color: var(--green);
+    background: rgba(74, 222, 128, 0.12);
+  }
+  .big-choice.correct .big-letter { background: var(--green); color: #0a1a0a; }
+
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+  .ctrl {
+    padding: 0.9rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms;
+  }
+  .ctrl:hover { border-color: var(--accent); }
+  .ctrl.primary { background: var(--accent); color: #1a1a0a; border-color: var(--accent); }
+  .ctrl.primary:hover { background: #fce358; }
+  .ctrl.danger { border-color: rgba(239, 68, 68, 0.4); color: #ffa0a0; }
+
+  .timer-ring {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-family: 'Fraunces', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    font-style: italic;
+  }
+  .timer-ring.urgent { color: var(--accent-2); animation: pulse-big 0.5s ease-in-out infinite; }
+  @keyframes pulse-big {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  /* Answer stats bar */
+  .answer-stats {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.5rem;
+    height: 6px;
+    border-radius: 100px;
+    overflow: hidden;
+    background: var(--border);
+  }
+  .answer-stats .seg {
+    transition: flex-basis 400ms;
+  }
+
+  /* Winners display */
+  .winners-stage {
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .winners-stage h2 {
+    font-size: clamp(3rem, 7vw, 5rem);
+    font-weight: 900;
+    font-style: italic;
+    margin-bottom: 2rem;
+    color: var(--accent);
+  }
+  .winner-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 0.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeIn 500ms;
+  }
+  .winner-row .wname { font-size: 1.2rem; font-weight: 600; }
+  .winner-row .wamt { font-size: 1.4rem; font-weight: 900; color: var(--accent); font-style: italic; font-variant-numeric: tabular-nums; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-in { animation: fadeIn 400ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+  .conn-lost {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: var(--red);
+    color: white;
+    text-align: center;
+    padding: 0.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    z-index: 2000;
+    transform: translateY(-100%);
+    transition: transform 300ms;
+  }
+  .conn-lost.show { transform: translateY(0); }
+
+  /* Finalist list */
+  .final-choice-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .final-choice-list .pc {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+  .pc.going { border-color: var(--accent); color: var(--accent); }
+  .pc.walking { border-color: var(--green); color: var(--green); }
+  .pc.pending { color: var(--ink-dim); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="conn-lost" id="conn-lost">Reconnecting…</div>
+
+<!-- HOME: pick a game -->
+<div id="home">
+  <h1>Game Show Platform</h1>
+  <div class="tag">Host · Pick a Game</div>
+  <div class="game-grid">
+    <div class="game-card available" onclick="createRoom('onePercentClub')">
+      <div class="badge live">Live</div>
+      <div class="title">The 1% Club</div>
+      <div class="desc">Logic & common sense. 11 questions of increasing difficulty. Up to 200 players.</div>
+    </div>
+    <div class="game-card coming-soon">
+      <div class="badge soon">Soon</div>
+      <div class="title">Wheel of Fortune</div>
+      <div class="desc">Extensible framework stub · implement in games/wheelOfFortune.js</div>
+    </div>
+    <div class="game-card coming-soon">
+      <div class="badge soon">Soon</div>
+      <div class="title">Bingo</div>
+      <div class="desc">Extensible framework stub · implement in games/bingo.js</div>
+    </div>
+    <div class="game-card coming-soon">
+      <div class="badge soon">Soon</div>
+      <div class="title">Jeopardy</div>
+      <div class="desc">Extensible framework stub · implement in games/jeopardy.js</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY: show QR + roster -->
+<div id="lobby">
+  <div class="lobby-grid">
+    <div class="join-panel">
+      <div class="small">Join at</div>
+      <div class="join-url" id="join-url">—</div>
+      <div class="qr-box"><img id="qr" src="" alt="QR"></div>
+      <div class="small" style="margin-top: 1.5rem;">Room Code</div>
+      <div class="room-code" id="code">—</div>
+    </div>
+    <div class="players-panel">
+      <h2>Players <span class="players-count" id="pcount">0</span></h2>
+      <div class="sub">Up to 200 · waiting to start</div>
+      <div class="players-list" id="plist"></div>
+      <button class="start-btn" id="start-btn" disabled onclick="startGame()">Start Game</button>
+    </div>
+  </div>
+</div>
+
+<!-- GAME: active play -->
+<div id="game"></div>
+
+<script src="/games/onePercentClub-host.js"></script>
+<script>
+  const PROTOCOL = {
+    HOST_CREATE_ROOM: 'HOST_CREATE_ROOM',
+    HOST_START_GAME: 'HOST_START_GAME',
+    HOST_ACTION: 'HOST_ACTION',
+    PLAYER_JOIN: 'PLAYER_JOIN',
+    PLAYER_ACTION: 'PLAYER_ACTION',
+    RECONNECT: 'RECONNECT',
+    STATE_UPDATE: 'STATE_UPDATE',
+    ROOM_CREATED: 'ROOM_CREATED',
+    ERROR: 'ERROR',
+    GAME_EVENT: 'GAME_EVENT',
+  };
+  window.PROTOCOL = PROTOCOL;
+
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${proto}//${location.host}/ws`;
+  let ws;
+  let hostId = null;
+  let roomCode = null;
+  let gameType = null;
+  let currentState = null;
+  let reconnectAttempts = 0;
+
+  const saved = JSON.parse(localStorage.getItem('hostSession') || 'null');
+
+  function connect() {
+    ws = new WebSocket(wsUrl);
+    ws.addEventListener('open', () => {
+      reconnectAttempts = 0;
+      document.getElementById('conn-lost').classList.remove('show');
+      if (saved && saved.hostId && saved.roomCode) {
+        ws.send(JSON.stringify({
+          type: PROTOCOL.RECONNECT,
+          isHost: true,
+          hostId: saved.hostId,
+          roomCode: saved.roomCode,
+        }));
+      }
+    });
+    ws.addEventListener('message', (e) => {
+      let msg; try { msg = JSON.parse(e.data); } catch (err) { return; }
+      handleMessage(msg);
+    });
+    ws.addEventListener('close', () => {
+      document.getElementById('conn-lost').classList.add('show');
+      reconnectAttempts++;
+      setTimeout(connect, Math.min(reconnectAttempts * 500, 5000));
+    });
+    ws.addEventListener('error', () => {});
+  }
+
+  function send(msg) {
+    if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg));
+  }
+
+  function handleMessage(msg) {
+    if (msg.type === PROTOCOL.ROOM_CREATED) {
+      hostId = msg.hostId;
+      roomCode = msg.roomCode;
+      gameType = msg.gameType;
+      localStorage.setItem('hostSession', JSON.stringify({ hostId, roomCode, gameType }));
+      showLobby();
+      loadQR(roomCode);
+    } else if (msg.type === PROTOCOL.STATE_UPDATE) {
+      currentState = msg.state;
+      render();
+    } else if (msg.type === PROTOCOL.ERROR) {
+      if (/invalid host/i.test(msg.message) || /room not found/i.test(msg.message)) {
+        localStorage.removeItem('hostSession');
+        location.reload();
+        return;
+      }
+      alert(msg.message);
+    }
+  }
+
+  window.createRoom = function(gameType) {
+    // Clear any stale session
+    localStorage.removeItem('hostSession');
+    send({ type: PROTOCOL.HOST_CREATE_ROOM, gameType });
+  };
+
+  window.startGame = function() {
+    send({ type: PROTOCOL.HOST_START_GAME });
+  };
+
+  window.hostAction = function(action, data = {}) {
+    send({ type: PROTOCOL.HOST_ACTION, action, data });
+  };
+
+  function showLobby() {
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('lobby').style.display = 'block';
+    document.getElementById('game').style.display = 'none';
+    document.getElementById('code').textContent = roomCode;
+    const url = `${location.protocol}//${location.host}/?code=${roomCode}`;
+    document.getElementById('join-url').textContent = url.replace(/^https?:\/\//, '');
+  }
+
+  function showGame() {
+    document.getElementById('home').style.display = 'none';
+    document.getElementById('lobby').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+  }
+
+  async function loadQR(code) {
+    try {
+      const res = await fetch('/api/qr/' + code);
+      const json = await res.json();
+      document.getElementById('qr').src = json.qr;
+    } catch (e) {}
+  }
+
+  function render() {
+    if (!currentState) return;
+    const s = currentState;
+    if (s.phase === 'lobby') {
+      if (document.getElementById('lobby').style.display === 'none') showLobby();
+      renderLobbyRoster(s);
+    } else {
+      showGame();
+      // Dispatch by game type
+      window.renderOnePercentClubHost(s, document.getElementById('game'), window.hostAction);
+    }
+  }
+
+  function renderLobbyRoster(s) {
+    const n = (s.players || []).length;
+    document.getElementById('pcount').textContent = n;
+    document.getElementById('start-btn').disabled = n < 1;
+    const list = document.getElementById('plist');
+    const existing = new Set([...list.children].map(c => c.dataset.id));
+    const incoming = new Set((s.players || []).map(p => p.id));
+    for (const p of s.players || []) {
+      if (!existing.has(p.id)) {
+        const el = document.createElement('div');
+        el.className = 'player-tag';
+        el.dataset.id = p.id;
+        el.textContent = p.name;
+        list.appendChild(el);
+      }
+    }
+    for (const child of [...list.children]) {
+      if (!incoming.has(child.dataset.id)) child.remove();
+    }
+  }
+
+  connect();
+</script>
+</body>
+</html>

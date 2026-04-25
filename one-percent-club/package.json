@@ -1,0 +1,17 @@
+{
+  "name": "game-show-platform",
+  "version": "1.0.0",
+  "description": "Multiplayer game show platform - The 1% Club and extensible for more",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "qrcode": "^1.5.4"
+  }
+}
