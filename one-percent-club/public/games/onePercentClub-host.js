@@ -8,7 +8,9 @@
       for (const k in attrs) {
         if (k === 'class') el.className = attrs[k];
         else if (k === 'onclick') el.onclick = attrs[k];
-        else if (k === 'disabled' && attrs[k]) el.disabled = true;
+        else if (k === 'disabled') {
+          if (attrs[k]) el.disabled = true;
+        }
         else if (k === 'style') el.setAttribute('style', attrs[k]);
         else el.setAttribute(k, attrs[k]);
       }
@@ -122,6 +124,13 @@
     const qs = state.questionState;
     const phase = state.phase;
     const finalPhase = state.finalPhase;
+    
+    if (phase === 'lobby') {
+      controls.push(h('button', {
+        class: 'ctrl',
+        onclick: () => openQuestionEditor(state, hostAction)
+      }, ['Customize Questions']));
+    }
 
     if (phase === 'playing') {
       if (finalPhase === 'choosing') {
@@ -164,6 +173,30 @@
     }
 
     return h('div', { class: 'controls' }, controls);
+  }
+  
+  function openQuestionEditor(state, hostAction) {
+    const json = prompt(
+      'Paste custom questions JSON:',
+      JSON.stringify([
+        {
+          level: 90,
+          question: 'How many sides does a hexagon have?',
+          choices: ['5', '6', '7', '8'],
+          answerIndex: 1
+        }
+      ], null, 2)
+    );
+
+    if (!json) return;
+
+    try {
+      const questions = JSON.parse(json);
+      hostAction('SET_CUSTOM_QUESTIONS', { questions });
+      alert('Custom questions saved for this room.');
+    } catch (err) {
+      alert('Invalid JSON. Please check your formatting.');
+    }
   }
 
   function renderFinalChoices(state) {

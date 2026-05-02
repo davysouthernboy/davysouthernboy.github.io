@@ -108,6 +108,34 @@ class OnePercentClubGame extends BaseGame {
       case 'END_GAME':
         this.endGame();
         break;
+      case 'SET_CUSTOM_QUESTIONS':
+        this.setCustomQuestions(data.questions);
+        break;
+    }
+  }
+  
+  setCustomQuestions(questions) {
+    if (this.phase !== 'lobby') return;
+    if (!Array.isArray(questions)) return;
+
+    const clean = questions
+      .filter(q =>
+        q &&
+        typeof q.question === 'string' &&
+        Array.isArray(q.choices) &&
+        q.choices.length === 4 &&
+        Number.isInteger(q.answerIndex) && q.answerIndex >= 0 && q.answerIndex < 4 && q.question.trim().length > 0 && q.choices.every(c => String(c).trim().length > 0)
+      )
+      .map(q => ({
+        level: Number(q.level) || 90,
+        question: q.question.trim(),
+        choices: q.choices.map(c => String(c).trim()),
+        answerIndex: q.answerIndex,
+      }));
+
+    if (clean.length > 0) {
+      this.questions = clean;
+      this.broadcastState();
     }
   }
 
