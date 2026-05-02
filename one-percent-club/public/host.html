@@ -504,6 +504,7 @@
       <h2>Players <span class="players-count" id="pcount">0</span></h2>
       <div class="sub">Up to 200 · waiting to start</div>
       <div class="players-list" id="plist"></div>
+      <button class="start-btn" id="custom-questions-btn" onclick="openQuestionEditor()">Customize Questions</button>
       <button class="start-btn" id="start-btn" disabled onclick="startGame()">Start Game</button>
     </div>
   </div>
@@ -660,6 +661,30 @@
       if (!incoming.has(child.dataset.id)) child.remove();
     }
   }
+  
+  window.openQuestionEditor = function() {
+  const json = prompt(
+    'Paste custom questions JSON:',
+    JSON.stringify([
+      {
+        level: 90,
+        question: 'How many sides does a hexagon have?',
+        choices: ['5', '6', '7', '8'],
+        answerIndex: 1
+      }
+    ], null, 2)
+  );
+
+  if (!json) return;
+
+  try {
+    const questions = JSON.parse(json);
+    hostAction('SET_CUSTOM_QUESTIONS', { questions });
+    alert('Custom questions saved for this room.');
+  } catch (err) {
+    alert('Invalid JSON. Please check your formatting.');
+  }
+};
 
   connect();
 </script>
