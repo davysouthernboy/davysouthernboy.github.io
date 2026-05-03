@@ -1,0 +1,16 @@
+{
+  "name": "dojo-fury",
+  "version": "1.0.0",
+  "description": "16-bit arcade beat 'em up with co-op and versus modes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}

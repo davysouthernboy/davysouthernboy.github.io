@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DOJO FURY ⚔ 16-bit Beat 'Em Up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="crt"></div>
+<div id="scanlines"></div>
+
+<!-- ============== TITLE SCREEN ============== -->
+<section id="screen-title" class="screen active">
+  <div class="title-stack">
+    <h1 class="title-glow">DOJO<br><span class="red">FURY</span></h1>
+    <p class="subtitle">◆ FISTS OF THE NEON DRAGON ◆</p>
+    <div class="menu">
+      <button class="arcade-btn" data-action="host-coop">⚔ HOST CO-OP</button>
+      <button class="arcade-btn" data-action="host-versus">⚡ HOST VERSUS</button>
+      <button class="arcade-btn" data-action="join">↳ JOIN ROOM</button>
+      <button class="arcade-btn" data-action="solo">☆ SOLO PRACTICE</button>
+    </div>
+    <p class="credit">PRESS START · INSERT COIN · 1986</p>
+  </div>
+</section>
+
+<!-- ============== JOIN ROOM ============== -->
+<section id="screen-join" class="screen">
+  <div class="panel">
+    <h2>ENTER ROOM CODE</h2>
+    <input id="room-code-input" maxlength="4" placeholder="XXXX" autocomplete="off" />
+    <div class="row">
+      <button class="arcade-btn" data-action="confirm-join">JOIN</button>
+      <button class="arcade-btn ghost" data-action="back-title">BACK</button>
+    </div>
+    <p id="join-error" class="error"></p>
+  </div>
+</section>
+
+<!-- ============== CHARACTER SELECT ============== -->
+<section id="screen-select" class="screen">
+  <div class="select-header">
+    <h2>SELECT YOUR FIGHTER</h2>
+    <div class="room-info">
+      ROOM: <span id="room-display">----</span>
+      <span class="dot"></span>
+      MODE: <span id="mode-display">CO-OP</span>
+      <span class="dot"></span>
+      <span id="peer-status">WAITING FOR P2...</span>
+    </div>
+  </div>
+
+  <div class="char-grid">
+    <div class="char-card" data-char="ryu">
+      <div class="char-portrait" data-portrait="ryu"></div>
+      <h3>RYU TENKAI</h3>
+      <p class="char-tag">THE WANDERING MONK</p>
+      <div class="stats">
+        <span>PWR ▮▮▮▮▯</span>
+        <span>SPD ▮▮▮▯▯</span>
+        <span>HP  ▮▮▮▮▯</span>
+      </div>
+      <p class="special">⚡ DRAGON FIST: ↓ ↘ → + A</p>
+    </div>
+    <div class="char-card" data-char="kira">
+      <div class="char-portrait" data-portrait="kira"></div>
+      <h3>KIRA NEON</h3>
+      <p class="char-tag">CYBER NINJA</p>
+      <div class="stats">
+        <span>PWR ▮▮▮▯▯</span>
+        <span>SPD ▮▮▮▮▮</span>
+        <span>HP  ▮▮▮▯▯</span>
+      </div>
+      <p class="special">⚡ SHADOW STRIKE: → → + A</p>
+    </div>
+    <div class="char-card" data-char="brick">
+      <div class="char-portrait" data-portrait="brick"></div>
+      <h3>BRICK STONE</h3>
+      <p class="char-tag">THE STREET BRAWLER</p>
+      <div class="stats">
+        <span>PWR ▮▮▮▮▮</span>
+        <span>SPD ▮▮▯▯▯</span>
+        <span>HP  ▮▮▮▮▮</span>
+      </div>
+      <p class="special">⚡ EARTHQUAKE: ↓ ↓ + B</p>
+    </div>
+  </div>
+
+  <div class="select-footer">
+    <p class="hint">P1 selects with mouse · click a fighter to lock in</p>
+    <div class="row">
+      <button id="start-btn" class="arcade-btn" disabled>START FIGHT</button>
+      <button class="arcade-btn ghost" data-action="back-title">CANCEL</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============== GAME ============== -->
+<section id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-player" id="hud-p1">
+      <div class="hud-name">P1</div>
+      <div class="hud-bar"><div class="hud-bar-fill"></div></div>
+      <div class="hud-special"><div class="hud-special-fill"></div></div>
+    </div>
+    <div class="hud-center">
+      <div class="hud-score">SCORE <span id="score">000000</span></div>
+      <div class="hud-stage">STAGE <span id="stage">1</span></div>
+    </div>
+    <div class="hud-player right" id="hud-p2">
+      <div class="hud-name">P2</div>
+      <div class="hud-bar"><div class="hud-bar-fill"></div></div>
+      <div class="hud-special"><div class="hud-special-fill"></div></div>
+    </div>
+  </div>
+
+  <canvas id="game-canvas" width="960" height="540"></canvas>
+
+  <div id="combat-log"></div>
+
+  <div class="controls-overlay" id="controls-overlay">
+    <div class="controls-panel">
+      <h3>CONTROLS</h3>
+      <div class="control-grid">
+        <div>
+          <h4>P1 (HOST)</h4>
+          <p>WASD - MOVE</p>
+          <p>J - PUNCH (A)</p>
+          <p>K - KICK (B)</p>
+          <p>L - JUMP</p>
+          <p>U - BLOCK</p>
+        </div>
+        <div>
+          <h4>P2 (LOCAL FALLBACK)</h4>
+          <p>ARROWS - MOVE</p>
+          <p>1 - PUNCH (A)</p>
+          <p>2 - KICK (B)</p>
+          <p>3 - JUMP</p>
+          <p>4 - BLOCK</p>
+        </div>
+      </div>
+      <p class="hint">Online: each player uses P1 controls on their own machine</p>
+      <button class="arcade-btn" id="dismiss-controls">FIGHT!</button>
+    </div>
+  </div>
+
+  <div id="game-over-overlay" class="game-over-overlay">
+    <div class="game-over-panel">
+      <h2 id="game-over-title">GAME OVER</h2>
+      <p id="game-over-sub"></p>
+      <button class="arcade-btn" data-action="back-title">RETURN TO TITLE</button>
+    </div>
+  </div>
+</section>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="characters.js"></script>
+<script src="game.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
