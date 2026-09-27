@@ -136,6 +136,9 @@
     <div><span class="label">Title</span><span class="value" id="vTitle"></span></div>
     <div><span class="label">Mileage</span><span class="value" id="mileage"></span></div>
     <div><span class="label">Cash Price</span><span class="value" id="price"></span></div>
+    <div id="colorRow" hidden><span class="label">Color</span><span class="value" id="color"></span></div>
+    <div id="financeRow" hidden><span class="label">Finance Price</span><span class="value" id="financePrice"></span></div>
+    <div id="downRow" hidden><span class="label">Down Payment</span><span class="value" id="downPayment"></span></div>
   </div>
 
   <div class="actions">
@@ -498,6 +501,49 @@ const inventory = {
  
   
   
+
+  "114": {
+    title: "2018 Hyundai Sonata",
+    titleStatus: "Salvage",
+    mileage: "112,000",
+    price: "$7,800",
+    color: "Blue",
+    financePrice: "$9,899",
+    downPayment: "$2,599",
+    photos: [
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/1.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/2.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/3.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/4.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/5.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/6.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/7.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/8.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/9.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/10.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/11.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/12.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/13.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/14.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/15.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/16.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/17.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/18.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/19.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/20.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/21.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/22.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/23.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/24.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/25.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/26.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/27.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/28.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/29.jpg",
+      "images/2018_Hyundai_Sonata_5NPE24AA8JH669118/30.jpg"
+    ]
+  },
+
 };
 
 /* --- READ ID FROM URL --- */
@@ -511,11 +557,26 @@ if (car) {
   document.getElementById("mileage").textContent = car.mileage;
   document.getElementById("price").textContent = car.price;
 
+  if (car.color) {
+    document.getElementById("color").textContent = car.color;
+    document.getElementById("colorRow").hidden = false;
+  }
+  if (car.financePrice) {
+    document.getElementById("financePrice").textContent = car.financePrice;
+    document.getElementById("financeRow").hidden = false;
+  }
+  if (car.downPayment) {
+    document.getElementById("downPayment").textContent = car.downPayment;
+    document.getElementById("downRow").hidden = false;
+  }
+
   const photoGrid = document.getElementById("photos");
   car.photos.forEach(src => {
     const img = document.createElement("img");
     img.src = src;
     img.loading = "lazy";
+    img.alt = car.title + " photo";
+    img.onerror = () => img.remove();
     photoGrid.appendChild(img);
   });
   
