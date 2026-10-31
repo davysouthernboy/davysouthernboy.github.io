@@ -1,0 +1,544 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Maze Roller</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@500&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* Maze Roller, with synthesized music and sound effects (see the Sound block in the script).
+   Layout: one centered column. Stat strip on top, a square board in the middle, controls hint underneath.
+   Single dark look on purpose: the board is a lit table, and the exit hole is the one bright thing on it. */
+:root {
+  --bg: #0d151c;
+  --board: #14222c;
+  --grid: #1b2d39;
+  --wall: #8fb3c4;
+  --fg: #e6eef2;
+  --muted: #8aa1ad;
+  --exit: #ff6b4a;
+  --panel: #1a2b36;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 32px;
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.actions { display: flex; gap: 8px; }
+button {
+  font: 600 0.9rem var(--font-body);
+  color: var(--fg);
+  background: var(--panel);
+  border: 1px solid #2b4352;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--wall); }
+button:focus-visible { outline: 2px solid var(--exit); outline-offset: 2px; }
+button.primary { background: var(--exit); color: #1a0c08; border-color: var(--exit); }
+button[aria-pressed="false"] { color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stat { background: var(--panel); border-radius: 8px; padding: 8px 12px; min-width: 0; }
+.stat .label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.stat .value { font-family: var(--font-data); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+#stage { position: relative; display: flex; justify-content: center; }
+canvas { display: block; background: var(--board); border-radius: 10px; touch-action: none; max-width: 100%; }
+#overlay {
+  position: absolute; inset: 0; margin: auto;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(13, 21, 28, 0.78);
+  border-radius: 10px;
+}
+#overlay .card { background: var(--panel); border: 1px solid #2b4352; border-radius: 12px; padding: 24px; text-align: center; max-width: 300px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+#overlay h2 { font-family: var(--font-display); font-size: 1.6rem; margin: 0; }
+#overlay p { margin: 0; color: var(--muted); }
+#overlay .big { font-family: var(--font-data); font-size: 1.8rem; color: var(--fg); font-variant-numeric: tabular-nums; }
+.hint { color: var(--muted); font-size: 0.9rem; margin: 0; }
+kbd { font-family: var(--font-data); font-size: 0.8rem; background: var(--panel); border: 1px solid #2b4352; border-radius: 4px; padding: 1px 6px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Maze Roller</h1>
+    <div class="actions">
+      <button id="sound" type="button" aria-pressed="true">Sound on</button>
+      <button id="restart" type="button">New maze</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><span class="label">Level</span><span class="value" id="lvl">1</span></div>
+    <div class="stat"><span class="label">Time</span><span class="value" id="time">0.0</span></div>
+    <div class="stat"><span class="label">Best</span><span class="value" id="best">&ndash;</span></div>
+  </div>
+
+  <div id="stage">
+    <canvas id="board" aria-label="Maze. Roll the ball to the glowing exit hole."></canvas>
+    <div id="overlay" hidden>
+      <div class="card">
+        <h2 id="ovTitle">Level cleared</h2>
+        <div class="big" id="ovTime">0.0s</div>
+        <p id="ovBest"></p>
+        <button id="next" type="button" class="primary">Next level</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="hint">Roll the ball to the glowing hole. Use <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>, or drag on the board with your finger or mouse. The timer starts when you first move. <kbd>R</kbd> makes a new maze. <kbd>M</kbd> mutes the music and sound effects.</p>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var cvs = $('board'), ctx = cvs.getContext('2d');
+
+  /* ---------- Sound ----------
+     All audio is synthesized with the Web Audio API, so nothing is downloaded.
+     Music: a slow A-minor arpeggio over a soft pad and bass.
+     Roll: filtered noise whose pitch, volume and flutter follow the ball's speed.
+     Bell: inharmonic sine partials with a long decay, played at the exit hole.
+     Browsers only allow audio after a tap or key press, so it starts on the first input. */
+  var Snd = (function () {
+    var ac = null, master, musicBus, sfxBus, rollGain, rollFilter, lfo, lfoDepth;
+    var muted = false;
+    try { muted = localStorage.getItem('maze-roller-muted') === '1'; } catch (e) {}
+
+    var BPM = 88, EIGHTH = 60 / BPM / 2;
+    var prog = [
+      { bass: 45, arp: [57, 60, 64, 67] },   // Am
+      { bass: 41, arp: [57, 60, 65, 69] },   // F
+      { bass: 48, arp: [55, 60, 64, 67] },   // C
+      { bass: 43, arp: [55, 59, 62, 67] }    // G
+    ];
+    var pattern = [0, 1, 2, 3, 2, 1, 2, 3];
+    var nextTime = 0, stepNo = 0, timer = null;
+
+    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+    function pluck(freq, t, dur, vol) {
+      var o = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      f.type = 'lowpass';
+      f.frequency.value = 2200;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(f); f.connect(g); g.connect(musicBus);
+      o.start(t); o.stop(t + dur + 0.05);
+    }
+
+    function pad(freq, t, dur, vol) {
+      [-4, 4].forEach(function (cents) {
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        o.detune.value = cents;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(vol, t + dur * 0.3);
+        g.gain.linearRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(musicBus);
+        o.start(t); o.stop(t + dur + 0.05);
+      });
+    }
+
+    function scheduleStep(t, n) {
+      var inBar = n % 8, chord = prog[Math.floor(n / 8) % prog.length];
+      if (inBar === 0) {
+        pluck(hz(chord.bass), t, EIGHTH * 7, 0.22);
+        for (var i = 1; i < 4; i++) pad(hz(chord.arp[i]), t, EIGHTH * 8.5, 0.035);
+      }
+      if (inBar === 4) pluck(hz(chord.bass + 12), t, EIGHTH * 3, 0.08);
+      pluck(hz(chord.arp[pattern[inBar]]), t, EIGHTH * 3.2, inBar % 2 === 0 ? 0.11 : 0.075);
+    }
+
+    function tick() {
+      if (!ac || ac.state !== 'running') return;
+      if (nextTime < ac.currentTime) nextTime = ac.currentTime + 0.05;
+      while (nextTime < ac.currentTime + 0.35) {
+        scheduleStep(nextTime, stepNo);
+        stepNo = (stepNo + 1) % 32;
+        nextTime += EIGHTH;
+      }
+    }
+
+    function noiseBuffer() {
+      var len = ac.sampleRate * 2, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0), last = 0;
+      for (var i = 0; i < len; i++) {
+        var w = Math.random() * 2 - 1;
+        last = (last + 0.04 * w) / 1.04;   // brown-ish noise, a softer rumble than white
+        d[i] = last * 3.5;
+      }
+      return buf;
+    }
+
+    function build() {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      ac = new AC();
+      master = ac.createGain();
+      master.gain.value = muted ? 0 : 0.9;
+      master.connect(ac.destination);
+      musicBus = ac.createGain(); musicBus.gain.value = 1.0; musicBus.connect(master);
+      sfxBus = ac.createGain(); sfxBus.gain.value = 1; sfxBus.connect(master);
+
+      // rolling: noise -> bandpass -> flutter gain -> level gain
+      var src = ac.createBufferSource();
+      src.buffer = noiseBuffer(); src.loop = true;
+      rollFilter = ac.createBiquadFilter();
+      rollFilter.type = 'bandpass'; rollFilter.frequency.value = 160; rollFilter.Q.value = 0.9;
+      var flutter = ac.createGain(); flutter.gain.value = 0.7;
+      lfo = ac.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 3;
+      lfoDepth = ac.createGain(); lfoDepth.gain.value = 0.3;
+      lfo.connect(lfoDepth); lfoDepth.connect(flutter.gain);
+      rollGain = ac.createGain(); rollGain.gain.value = 0;
+      src.connect(rollFilter); rollFilter.connect(flutter); flutter.connect(rollGain); rollGain.connect(sfxBus);
+      src.start(); lfo.start();
+
+      nextTime = ac.currentTime + 0.1;
+      timer = setInterval(tick, 100);
+    }
+
+    function unlock() {
+      try {
+        if (!ac) build();
+        if (ac && ac.state === 'suspended') ac.resume();
+      } catch (e) {}
+    }
+
+    function roll(speed) {
+      if (!ac) return;
+      var k = Math.min(speed / 4, 1);
+      var now = ac.currentTime;
+      rollGain.gain.setTargetAtTime(k < 0.03 ? 0 : 0.5 * Math.pow(k, 1.2), now, 0.06);
+      rollFilter.frequency.setTargetAtTime(140 + k * 520, now, 0.08);
+      lfo.frequency.setTargetAtTime(2 + speed * 2.6, now, 0.1);
+    }
+
+    function bell() {
+      if (!ac) return;
+      var t = ac.currentTime + 0.02, base = 880;
+      var partials = [[0.5, 0.35, 2.6], [1, 1, 2.8], [2, 0.45, 2.0], [2.76, 0.3, 1.5], [5.4, 0.14, 0.8]];
+      partials.forEach(function (p) {
+        var o = ac.createOscillator(), g = ac.createGain();
+        o.type = 'sine';
+        o.frequency.value = base * p[0];
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.3 * p[1], t + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + p[2]);
+        o.connect(g); g.connect(sfxBus);
+        o.start(t); o.stop(t + p[2] + 0.05);
+      });
+      // keep the music out of the bell's way for a moment
+      musicBus.gain.cancelScheduledValues(t);
+      musicBus.gain.setTargetAtTime(0.2, t, 0.05);
+      musicBus.gain.setTargetAtTime(1.0, t + 1.6, 0.5);
+    }
+
+    function setMuted(m) {
+      muted = m;
+      try { localStorage.setItem('maze-roller-muted', m ? '1' : '0'); } catch (e) {}
+      if (master) master.gain.setTargetAtTime(m ? 0 : 0.9, ac.currentTime, 0.05);
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (!ac) return;
+      if (document.hidden) ac.suspend(); else ac.resume();
+    });
+
+    return { unlock: unlock, roll: roll, bell: bell, setMuted: setMuted, isMuted: function () { return muted; } };
+  })();
+
+  function syncSoundButton() {
+    var m = Snd.isMuted(), b = $('sound');
+    b.textContent = m ? 'Sound off' : 'Sound on';
+    b.setAttribute('aria-pressed', m ? 'false' : 'true');
+  }
+  function toggleSound() { Snd.unlock(); Snd.setMuted(!Snd.isMuted()); syncSoundButton(); }
+  ['pointerdown', 'touchend', 'keydown', 'click'].forEach(function (ev) {
+    window.addEventListener(ev, Snd.unlock, true);
+  });
+  $('sound').addEventListener('click', toggleSound);
+  syncSoundButton();
+
+  // Everything in the game runs in cell units; scale converts to pixels when drawing.
+  var T = 0.12;      // wall thickness
+  var R = 0.3;       // ball radius
+  var ACC = 30;      // acceleration, cells/s^2
+  var DAMP = 6;      // velocity damping, 1/s
+  var BOUNCE = 0.25;
+  var PAD = 10;      // board padding in px
+
+  var level = 1, cols = 7, rows = 7;
+  var walls = [], bx, by, vx, vy, trail = [], trailT = 0;
+  var started = false, elapsed = 0, won = false;
+  var scale = 30, dpr = 1, clock = 0;
+  var keys = {}, drag = null;
+
+  function bestKey(n) { return 'maze-roller-best-' + n; }
+  function getBest(n) {
+    try { var v = localStorage.getItem(bestKey(n)); return v ? parseFloat(v) : null; } catch (e) { return null; }
+  }
+  function setBest(n, v) { try { localStorage.setItem(bestKey(n), String(v)); } catch (e) {} }
+
+  function generate(n) {
+    cols = rows = Math.min(5 + n * 2, 25);
+    var cells = [], r, c;
+    for (r = 0; r < rows; r++) {
+      cells.push([]);
+      for (c = 0; c < cols; c++) cells[r].push({ n: true, e: true, s: true, w: true, seen: false });
+    }
+    var stack = [[0, 0]];
+    cells[0][0].seen = true;
+    while (stack.length) {
+      var cur = stack[stack.length - 1], cx = cur[0], cy = cur[1], opts = [];
+      if (cy > 0 && !cells[cy - 1][cx].seen) opts.push('n');
+      if (cx < cols - 1 && !cells[cy][cx + 1].seen) opts.push('e');
+      if (cy < rows - 1 && !cells[cy + 1][cx].seen) opts.push('s');
+      if (cx > 0 && !cells[cy][cx - 1].seen) opts.push('w');
+      if (!opts.length) { stack.pop(); continue; }
+      var d = opts[Math.floor(Math.random() * opts.length)], nx = cx, ny = cy;
+      if (d === 'n') { ny--; cells[cy][cx].n = false; cells[ny][nx].s = false; }
+      if (d === 'e') { nx++; cells[cy][cx].e = false; cells[ny][nx].w = false; }
+      if (d === 's') { ny++; cells[cy][cx].s = false; cells[ny][nx].n = false; }
+      if (d === 'w') { nx--; cells[cy][cx].w = false; cells[ny][nx].e = false; }
+      cells[ny][nx].seen = true;
+      stack.push([nx, ny]);
+    }
+    walls = [];
+    for (r = 0; r < rows; r++) {
+      for (c = 0; c < cols; c++) {
+        var cell = cells[r][c];
+        if (cell.n) walls.push({ x: c - T / 2, y: r - T / 2, w: 1 + T, h: T });
+        if (cell.w) walls.push({ x: c - T / 2, y: r - T / 2, w: T, h: 1 + T });
+        if (r === rows - 1 && cell.s) walls.push({ x: c - T / 2, y: r + 1 - T / 2, w: 1 + T, h: T });
+        if (c === cols - 1 && cell.e) walls.push({ x: c + 1 - T / 2, y: r - T / 2, w: T, h: 1 + T });
+      }
+    }
+  }
+
+  function resetBall() {
+    bx = 0.5; by = 0.5; vx = 0; vy = 0;
+    trail = []; trailT = 0;
+    started = false; elapsed = 0; won = false;
+    Snd.roll(0);
+    $('overlay').hidden = true;
+  }
+
+  function newMaze() {
+    generate(level);
+    resetBall();
+    layout();
+    updateHud();
+  }
+
+  function layout() {
+    var avail = Math.min($('stage').clientWidth || 640, 640);
+    scale = Math.max(8, Math.floor((avail - PAD * 2) / cols));
+    var size = cols * scale + PAD * 2;
+    dpr = window.devicePixelRatio || 1;
+    cvs.style.width = size + 'px';
+    cvs.style.height = size + 'px';
+    cvs.width = Math.round(size * dpr);
+    cvs.height = Math.round(size * dpr);
+  }
+
+  function inputVector() {
+    var x = 0, y = 0;
+    if (keys.ArrowLeft || keys.a) x -= 1;
+    if (keys.ArrowRight || keys.d) x += 1;
+    if (keys.ArrowUp || keys.w) y -= 1;
+    if (keys.ArrowDown || keys.s) y += 1;
+    if (x || y) { var m = Math.hypot(x, y); return [x / m, y / m]; }
+    if (drag) {
+      var dx = drag.x - drag.sx, dy = drag.y - drag.sy, len = Math.hypot(dx, dy);
+      if (len > 8) { var k = Math.min(len, 70) / 70; return [dx / len * k, dy / len * k]; }
+    }
+    return [0, 0];
+  }
+
+  function collide() {
+    for (var i = 0; i < walls.length; i++) {
+      var w = walls[i];
+      if (bx < w.x - R || bx > w.x + w.w + R || by < w.y - R || by > w.y + w.h + R) continue;
+      var cx = Math.max(w.x, Math.min(bx, w.x + w.w));
+      var cy = Math.max(w.y, Math.min(by, w.y + w.h));
+      var dx = bx - cx, dy = by - cy, d2 = dx * dx + dy * dy;
+      if (d2 < R * R && d2 > 1e-9) {
+        var d = Math.sqrt(d2), nx = dx / d, ny = dy / d;
+        bx += nx * (R - d); by += ny * (R - d);
+        var vn = vx * nx + vy * ny;
+        if (vn < 0) { vx -= (1 + BOUNCE) * vn * nx; vy -= (1 + BOUNCE) * vn * ny; }
+      }
+    }
+    bx = Math.max(R, Math.min(cols - R, bx));
+    by = Math.max(R, Math.min(rows - R, by));
+  }
+
+  function step(dt) {
+    var inp = inputVector();
+    if (!started && (inp[0] || inp[1])) started = true;
+    vx += inp[0] * ACC * dt; vy += inp[1] * ACC * dt;
+    var damp = Math.exp(-DAMP * dt);
+    vx *= damp; vy *= damp;
+    var sub = 4, h = dt / sub;
+    for (var i = 0; i < sub; i++) { bx += vx * h; by += vy * h; collide(); }
+    if (started) elapsed += dt;
+    trailT += dt;
+    if (trailT > 0.08 && (Math.abs(vx) + Math.abs(vy)) > 0.2) {
+      trail.push({ x: bx, y: by });
+      if (trail.length > 36) trail.shift();
+      trailT = 0;
+    }
+    Snd.roll(Math.hypot(vx, vy));
+    if (Math.hypot(bx - (cols - 0.5), by - (rows - 0.5)) < 0.26) win();
+  }
+
+  function fmt(t) { return t.toFixed(1); }
+
+  function win() {
+    won = true;
+    Snd.roll(0);
+    Snd.bell();
+    var prev = getBest(level), isBest = prev === null || elapsed < prev;
+    if (isBest) setBest(level, elapsed);
+    $('ovTitle').textContent = 'Level ' + level + ' cleared';
+    $('ovTime').textContent = fmt(elapsed) + 's';
+    $('ovBest').textContent = isBest ? (prev === null ? 'First clear on this level.' : 'New best time.') : 'Best: ' + fmt(prev) + 's';
+    $('next').textContent = level >= 10 ? 'Play again' : 'Next level';
+    $('overlay').hidden = false;
+    $('next').focus();
+    updateHud();
+  }
+
+  function nextLevel() {
+    if (level < 10) level++;
+    newMaze();
+  }
+
+  function updateHud() {
+    $('lvl').textContent = level;
+    $('time').textContent = fmt(elapsed);
+    var b = getBest(level);
+    $('best').textContent = b === null ? '–' : fmt(b);
+  }
+
+  function rr(x, y, w, h, r) {
+    if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill(); }
+    else ctx.fillRect(x, y, w, h);
+  }
+
+  function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    ctx.setTransform(dpr * scale, 0, 0, dpr * scale, dpr * PAD, dpr * PAD);
+
+    // faint floor grid
+    ctx.strokeStyle = '#1b2d39';
+    ctx.lineWidth = 0.02;
+    ctx.beginPath();
+    for (var i = 0; i <= cols; i++) { ctx.moveTo(i, 0); ctx.lineTo(i, rows); }
+    for (var j = 0; j <= rows; j++) { ctx.moveTo(0, j); ctx.lineTo(cols, j); }
+    ctx.stroke();
+
+    // start marker
+    ctx.strokeStyle = '#2b4352';
+    ctx.lineWidth = 0.05;
+    ctx.beginPath(); ctx.arc(0.5, 0.5, 0.38, 0, Math.PI * 2); ctx.stroke();
+
+    // exit hole
+    var ex = cols - 0.5, ey = rows - 0.5, pulse = 0.5 + 0.5 * Math.sin(clock * 3);
+    var glow = ctx.createRadialGradient(ex, ey, 0.1, ex, ey, 0.7 + 0.1 * pulse);
+    glow.addColorStop(0, 'rgba(255,107,74,0.55)');
+    glow.addColorStop(1, 'rgba(255,107,74,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(ex, ey, 0.8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#05090c';
+    ctx.beginPath(); ctx.arc(ex, ey, 0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ff6b4a';
+    ctx.lineWidth = 0.05;
+    ctx.stroke();
+
+    // trail
+    for (var k = 0; k < trail.length; k++) {
+      ctx.fillStyle = 'rgba(143,179,196,' + (0.03 + 0.12 * (k / trail.length)) + ')';
+      ctx.beginPath(); ctx.arc(trail[k].x, trail[k].y, R * 0.55, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // walls
+    ctx.fillStyle = '#8fb3c4';
+    for (var w = 0; w < walls.length; w++) rr(walls[w].x, walls[w].y, walls[w].w, walls[w].h, T / 2);
+
+    // ball shadow and body
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath(); ctx.ellipse(bx + 0.05, by + 0.09, R, R * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+    var g = ctx.createRadialGradient(bx - 0.1, by - 0.11, 0.02, bx, by, R);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(0.35, '#c4d2db');
+    g.addColorStop(1, '#4b5f6b');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(bx, by, R, 0, Math.PI * 2); ctx.fill();
+  }
+
+  var last = 0;
+  function frame(ts) {
+    var dt = Math.min(0.05, (ts - last) / 1000 || 0.016);
+    last = ts;
+    clock += dt;
+    if (!won) step(dt);
+    if (!won && started) $('time').textContent = fmt(elapsed);
+    draw();
+    requestAnimationFrame(frame);
+  }
+
+  // Input
+  window.addEventListener('keydown', function (e) {
+    var k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (won && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); nextLevel(); return; }
+    if (k === 'r') { newMaze(); return; }
+    if (k === 'm') { toggleSound(); return; }
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd'].indexOf(k) > -1) {
+      keys[k] = true;
+      e.preventDefault();
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    var k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    delete keys[k];
+  });
+  window.addEventListener('blur', function () { keys = {}; drag = null; });
+
+  cvs.addEventListener('pointerdown', function (e) {
+    drag = { sx: e.clientX, sy: e.clientY, x: e.clientX, y: e.clientY };
+    try { cvs.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  cvs.addEventListener('pointermove', function (e) {
+    if (drag) { drag.x = e.clientX; drag.y = e.clientY; }
+  });
+  function endDrag() { drag = null; }
+  cvs.addEventListener('pointerup', endDrag);
+  cvs.addEventListener('pointercancel', endDrag);
+
+  $('next').addEventListener('click', nextLevel);
+  $('restart').addEventListener('click', newMaze);
+  window.addEventListener('resize', layout);
+
+  newMaze();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
