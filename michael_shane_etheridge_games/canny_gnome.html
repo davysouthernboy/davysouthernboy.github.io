@@ -76,6 +76,7 @@ kbd{font-family:var(--display);font-size:13px;color:var(--ink);background:var(--
     <li><kbd>Space</kbd><kbd>J</kbd> Swing your weapon</li>
     <li><kbd>E</kbd><kbd>Enter</kbd> Talk, read, confirm</li>
     <li><kbd>I</kbd><kbd>Tab</kbd> Items, weapons and map</li>
+    <li><kbd>V</kbd> Screen numbers: off / on / with grid</li>
     <li><kbd>G</kbd> Cycle graphics: 64 / 32 / 16-bit / classic</li>
     <li><kbd>Q</kbd> Quick-heal with supplies</li>
     <li><kbd>M</kbd> Sound on or off</li>
@@ -684,7 +685,7 @@ function buildWorld(){
   fill(20,16,8,6,T.PLAZA);
   put(25,20,T.WELL);info['25,20']="A deep stone well. You drop a bean in. Somewhere far below, it goes plip.";
   put(22,16,T.BOARD);
-  info['22,16']=()=>({name:'Notice Board',pages:['WANTED: Brave soul to bonk the slimes in the woods around the village. Inquire with Mayor Pebblewick.','LOST: One sock. Last seen near the bakery. No questions asked.']});
+  info['22,16']=()=>({name:'Notice Board',pages:['MISSING: Tuck, son of Canny Gnome. Last seen near the Magic Cave. Five orbs, five dungeons. Bring him home.','WANTED: Brave soul to bonk the slimes in the woods around the village. Inquire with Mayor Pebblewick.','LOST: One sock. Last seen near the bakery. No questions asked.']});
   put(20,21,T.LANTERN);put(27,21,T.LANTERN);
   info['20,21']=info['27,21']="A lantern burns steady. Its glass is slightly sooty.";
   // houses
@@ -717,8 +718,8 @@ function buildWorld(){
     return {name:'Crystal Shrine',pages:['The crystal is still recharging. It glows a patient blue.']};
   };
   // cave
-  fill(43,24,5,3,T.ROCK);put(45,26,T.CAVE);fill(45,27,1,3,T.PATH);
-  info['45,26']={name:'Cave',pages:['A cave mouth choked with boulders. Something rumbles deep inside. Maybe someday.']};
+  fill(43,24,5,3,T.ROCK);put(45,26,T.CMOUTH);fill(45,27,1,3,T.PATH);
+  put(47,28,T.SIGN);info['47,28']={name:'Cave Sign',pages:['THE MAGIC CAVE. Sealed by Grimsby with five orb sockets. Whatever is inside is humming, and very much awake.']};
   // road signs at the four exits
   put(1,16,T.SIGN);info['1,16']={name:'West Road',pages:['GREENHOLLOW WOOD, west. Woodcutters, herbs and a great many slimes in the deep parts.']};
   buildForest();
@@ -737,6 +738,7 @@ function buildWorld(){
   buildHowl();
   buildMountains();
   buildShops();
+  buildMagic();
   thinTrees();
 }
 function buildForest(){
@@ -778,6 +780,7 @@ function addChest(lv,x,y,reward){
   info[key]=()=>{
     if(G.opened.includes(key))return {name:'Chest',pages:['The chest is empty. Just a cobweb and a faint smell of goblin.']};
     G.opened.push(key);put(x,y,T.CHESTO);Snd.up();
+    if(reward.orb){const o=ORBS.find(q=>q.k===reward.orb);if(!G.orbs.includes(o.k))G.orbs.push(o.k);return {name:'Chest',pages:['Inside, glowing and warm, is the '+o.name+'!',G.orbs.length<5?('Orbs found: '+G.orbs.length+' of 5.'):'That is all five orbs! The Magic Cave seal should answer now. Hurry to the cave, south-east of the village, and save Tuck!']};}
     if(reward.jar){P.maxHp=Math.min(16,P.maxHp+2);P.hp=P.maxHp;return {name:'Chest',pages:['Inside is a glowing heart jar! Your maximum hearts go up.']};}
     P.coins+=reward.coins;
     return {name:'Chest',pages:['You found '+reward.coins+' coins!']};
@@ -860,6 +863,25 @@ function buildCaves(){
   setLevel(OVER);
 }
 function rug(x,y,w,h){for(let j=0;j<h;j++)for(let i=0;i<w;i++)put(x+i,y+j,T.RUG,(i===0?1:0)|(i===w-1?2:0)|(j===0?4:0)|(j===h-1?8:0));}
+function buildMagic(){
+  const lv=newCave('m1','Magic Cave',32,12);
+  lv.magic=true;
+  cavefloor(2,2,12,8);cavefloor(14,5,4,3);cavefloor(18,2,12,8);caveExit('m1',4,10);lv.start={x:4,y:8};
+  [[4,3],[7,3],[11,3],[5,6],[9,7],[12,6],[3,8],[20,3],[24,3],[28,4],[22,7],[26,7],[29,8],[19,8]].forEach(p=>put(p[0],p[1],T.CRYS));
+  [[6,1],[10,1],[22,1],[26,1]].forEach(p=>put(p[0],p[1],T.TORCH));
+  addChest(lv,3,3,{coins:40});addChest(lv,28,3,{jar:true});addChest(lv,29,8,{coins:60});
+  lv.spawns=[{type:'bat',x:8,y:5},{type:'bat',x:11,y:7},{type:'slime',x:6,y:4},{type:'bat',x:21,y:5},{type:'beetle',x:26,y:5},{type:'gob',x:24,y:8},{type:'bat',x:28,y:6}];
+  lv.ret={x:45*TS+16,y:27*TS+26};
+  lv.spawns.push({type:'bro',x:22,y:5,boss:true,bro:true});
+  PORTAL['over:45,26']={gate:()=>{
+    if(G.orbs.length>=5)return null;
+    const have=ORBS.map(o=>G.orbs.includes(o.k)?o.name:null).filter(Boolean);
+    return ['A shimmering seal covers the cave mouth, with five empty sockets: red, blue, gold, green and violet.','Orbs found: '+G.orbs.length+' of 5'+(have.length?' ('+have.join(', ')+').':'.'),storyHint()];
+  },go:()=>{if(G.orbs.length>=5&&!G.sealBroken){G.sealBroken=true;toast('The five orbs blaze. The seal shatters!');}enterCave('m1');}};
+  addChest(LV.c3,27,6,{orb:'ember'});addChest(LV.d1,27,6,{orb:'frost'});addChest(LV.k1,27,6,{orb:'sun'});
+  addChest(LV.k2,29,8,{orb:'moss'});addChest(LV.g1,29,8,{orb:'aurora'});
+  setLevel(OVER);
+}
 function buildHome(){
   const lv=newRoom('home','Home',16,12);
   fill(2,2,12,8,T.WFLOOR);
@@ -1043,6 +1065,7 @@ function buildMountains(){
   openRect(17,-6,5,3);
   buildHomeExterior();
 }
+let gateT=-9;
 function startFade(fn){fade={t:0,fn,ran:false};mode='fade';}
 function enterCave(id){
   const lv=LV[id];
@@ -1054,7 +1077,7 @@ function enterCave(id){
   cam.x=sx*VW;cam.y=sy*VH;
   for(let i=enemies.length-1;i>=0;i--)if(enemies[i].key.startsWith(id+':'))enemies.splice(i,1);
   for(let i=pickups.length-1;i>=0;i--)if(pickups[i].key.startsWith(id+':'))pickups.splice(i,1);
-  lv.spawns.forEach(s=>{if(s.boss&&(s.ice?G.warden:G.king))return;const en=mkEnemy(s.type,s.x*TS+16,s.y*TS+26,s.boss);if(s.ice)en.ice=true;});
+  lv.spawns.forEach(s=>{if(s.boss&&(s.bro?G.brother:s.ice?G.warden:G.king))return;const en=mkEnemy(s.type,s.x*TS+16,s.y*TS+26,s.boss);if(s.ice)en.ice=true;});
   enterScreen(sx,sy);
   toast(lv.name);
 }
@@ -1070,7 +1093,16 @@ function leaveCave(){
 }
 let now=0,shrineT=-99;
 const P={x:24*TS+16,y:19*TS+28,fx:0,fy:1,d4x:0,d4y:1,kx:0,ky:0,hp:6,maxHp:6,coins:0,lvl:1,wpn:'cane',inv:0,walk:0,swing:0,swingDur:0.26,cool:0,hit:null,aim:0,moving:false,flash:0};
-const G={quest:0,kills:0,king:false,warden:false,opened:[],weapons:['cane'],items:{apple:0,cider:0,tonic:0}};
+const G={quest:0,kills:0,king:false,warden:false,opened:[],weapons:['cane'],items:{apple:0,cider:0,tonic:0},orbs:[],brother:false,intro:false};
+const ORBS=[{k:'ember',name:'Ember Orb',col:'#ff5a3a'},{k:'frost',name:'Frost Orb',col:'#5ab8ff'},{k:'sun',name:'Sun Orb',col:'#ffd34a'},{k:'moss',name:'Verdigris Orb',col:'#4fd08a'},{k:'aurora',name:'Aurora Orb',col:'#c07aff'}];
+const ORB_HINT={ember:'the Goblin Hold, deep in the Stonecap Mountains',frost:'the Frozen Keep, on the island in the Frozen Lake',sun:'the Copper Mine, the west cave of Copper Hill',moss:'the Verdigris Cavern, the east cave of Copper Hill',aurora:'the Glacier Cavern, in Glacier Reach'};
+function storyHint(){
+  if(G.brother)return 'You saved Tuck and sent Grimsby packing. The whole hollow owes you a feast, Canny.';
+  if(G.orbs.length>=5)return 'All five orbs! The Magic Cave is just south-east of the village. Go and bring Tuck home, Canny.';
+  const o=ORBS.find(q=>!G.orbs.includes(q.k));
+  return 'Orbs found: '+G.orbs.length+' of 5. Grimsby hid the '+o.name+' in '+ORB_HINT[o.k]+'.';
+}
+const INTRO_PAGES=['Canny Gnome came home from the garden to find the front door swinging wide open. Tuck, his son, was gone.','On the table lay a note: "I have taken the boy. He is ENCHANTED, brother, and magic like that belongs with someone who knows what to do with it. Do not follow me. Grimsby."','Grimsby has locked himself in the Magic Cave, south-east of the village, behind a seal of five glowing sockets.','Five magic orbs lie hidden in five dungeons: the Goblin Hold, the Frozen Keep, the Copper Mine, the Verdigris Cavern and the Glacier Cavern. Find them all, open the cave and bring Tuck home!'];
 let Snd; // defined below, used lazily
 buildWorld();
 
@@ -1223,6 +1255,7 @@ function drawMenu(){
     txt(t,x+50,40,16,MN.tab===i?'#fff':'#a9b7a1','center');
   });
   txt('Coins: '+P.coins,478,40,15,'#f2c14e','right');
+  if(G.intro){txt('Orbs',262,40,14,'#f1ead6');ORBS.forEach((o,i)=>{const x=312+i*18;circ(ctx,'#0b120e',x,35,7);circ(ctx,G.orbs.includes(o.k)?o.col:'#2c3a34',x,35,5);});}
   if(MN.tab===0){
     const en=menuEntries();
     txt('Weapons',34,72,15,'#f2c14e');txt('Supplies',276,72,15,'#f2c14e');
@@ -1265,6 +1298,11 @@ function drawMenu(){
       if(!visited[j][i]){ctx.fillStyle='rgba(12,20,16,.74)';ctx.fillRect(mx+i*cw,my+j*ch,cw,ch);}
       ctx.strokeStyle=cur?'#f2c14e':'rgba(12,20,16,.35)';ctx.lineWidth=cur?2:1;
       ctx.strokeRect(mx+i*cw+0.5,my+j*ch+0.5,cw-1,ch-1);
+      ctx.font='9px '+FONT;ctx.textAlign='left';ctx.textBaseline='top';
+      const no=String(j*NSX+i+1);
+      ctx.fillStyle='rgba(12,20,16,.7)';ctx.fillText(no,mx+i*cw+3,my+j*ch+3);
+      ctx.fillStyle=visited[j][i]?'rgba(255,255,255,.9)':'rgba(190,205,190,.55)';ctx.fillText(no,mx+i*cw+2,my+j*ch+2);
+      ctx.textBaseline='alphabetic';
     }
     const X=t=>mx+((t+OX)/AW)*NSX*cw,Y=t=>my+((t+OY)/AH)*NSY*ch;
     // area names (shown once you have been there)
@@ -1338,6 +1376,7 @@ const NPCS=[
     if(G.quest===2)return {pages:['The slimes are quieter, but now goblins have moved into the mountain caves north of town.','Their king holds the Goblin Hold, east of the road past the stone bridge. Bring him down and I will pay you 50 coins. Deal?'],choices:[{label:'Deal!',fn:()=>{G.quest=3;Snd.up();return 'Quest started: defeat the Goblin King.';}},{label:'Later'}]};
     if(G.quest===3&&!G.king)return {pages:['The Goblin King holds the deepest cave in the Stonecap Mountains. Cross the bridge, then take the east branch. Careful, Canny.']};
     if(G.quest===3)return {pages:['The Goblin King, defeated! Pebble Hollow owes you a great deal.','Here are your 50 coins, and my thanks.'],onEnd:()=>{G.quest=4;P.coins+=50;Snd.coin();toast('+50 coins');}};
+    if(G.intro&&!G.brother)return {pages:[storyHint()]};
     return {pages:[cycle(this,['The roads out of the hollow are still rough. Come back when the map grows.','The crystal shrine in the northeast woods will patch you up for free.','Slimes do keep coming back. They are slimes, after all.'])]};
   }},
   {id:'baker',name:'Marigold',x:7,y:16,st:{skin:'#f0c4a4',hair:'#7a4a2a',shirt:'#f4f0e6',pants:'#5b5f73',hat:'chef',apron:'#f7f7f2'},talk(){
@@ -1354,6 +1393,7 @@ const NPCS=[
       P.coins-=cost;P.lvl++;Snd.up();return 'Your cane is now a '+CAN_NAMES[P.lvl-1]+'!';}},{label:'Browse weapons',fn:()=>{openShop("Brunhild's Forge",['club','spear','blade']);}},{label:'Not now'}]};
   }},
   {id:'bard',name:'Tilda',x:19,y:16,st:{skin:'#c98e6a',hair:'#2a2a4a',shirt:'#2f8f7a',pants:'#33405a',hat:'feather'},talk(){
+    if(G.intro&&!G.brother&&((this.n||0)%2===0)){this.n=(this.n||0)+1;return {pages:['I heard about Tuck, Canny. Awful. '+storyHint()]};}
     return {pages:[cycle(this,['They say a gnome once toppled a dragon with a casserole dish.','I am writing a ballad about you. It rhymes cane with... pain. Working on it.','Old songs say the roads once led to a great city. I would love to see it.'])]};
   }},
   {id:'inn',name:'Bram',x:39,y:16,st:{skin:'#e3b08e',hair:'#9a5a2a',shirt:'#b05a3a',pants:'#3f3f55',hat:null,beard:'#9a5a2a',apron:'#e8e0cc'},talk(){
@@ -1522,6 +1562,10 @@ const NPCS=[
       {label:'A hug',fn:()=>'Warm and smells like thyme. You feel braver.'}]};
   }},
 ];
+NPCS.push({id:'tuck',name:'Tuck',lv:'m1',x:27,y:5,scale:0.8,st:{skin:'#f0c4a4',hair:'#b5522a',shirt:'#2f8f7a',pants:'#4a4a3a',hat:'cap'},talk(){
+  if(!G.brother)return {pages:['Dad! Uncle Grimsby is right there! He charges, and he throws magic bolts. Watch his hands!']};
+  return {pages:['You did it, Dad!','Uncle Grimsby says he is sorry. He just wanted magic of his own.','I told him there is no secret to it. The magic is the family. It is you, and Mum, and the stew.','Come on, let us go home. Mum made stew.'],onEnd:()=>{banner={t:'THE END. Thanks for playing!',life:6};toast('The adventure goes on...');startFade(leaveCave);}};
+}});
 NPCS.forEach(n=>{n.px=n.x*TS+16;n.py=n.y*TS+30;n.ph=Math.random()*6;n.lv=n.lv||'over';if(n.lvName){const hi=HOUSES.findIndex(h=>h.name===n.lvName);if(hi>=0)n.lv='h'+hi;}});
 
 /* ================= SOUND ================= */
@@ -2662,6 +2706,7 @@ function updateProjs(dt,key){
 }
 function drawProj(c,p,t){
   c.save();c.translate(Math.round(p.x),Math.round(p.y));
+  if(p.mag){shadow(c,0,0,4.5,1.6,0.25);c.translate(0,-13);circ(c,'rgba(190,90,255,.35)',0,0,8);circ(c,'#c06aff',0,0,4.6);circ(c,'#f6d6ff',-1,-1,2);c.restore();return;}
   shadow(c,0,0,4.5,1.6,0.25);
   c.translate(0,-13);c.rotate(p.t*14);
   circ(c,'#6b4a2b',0,0,4.6);circ(c,'#8a6340',-1,-1.2,2.2);
@@ -2789,7 +2834,7 @@ function beetleAI(e,dt){
     e.stT-=dt;if(e.stT<=0){e.state='wander';e.stT=rnd(0.5,1);e.mvx=e.mvy=0;}
   }
 }
-function drawEnemy(c,e,t){if(e.type==='ghost')drawGhost(c,e,t);else if(e.type==='bat')drawBat(c,e,t);else if(e.type==='beetle')drawBeetle(c,e,t);else if(e.type==='scor')drawScorpion(c,e,t);else if(e.type==='gob')drawGoblin(c,e,t);else if(e.type==='mon')drawMonkey(c,e,t);else drawSlime(c,e,t);}
+function drawEnemy(c,e,t){if(e.type==='bro')drawBrother(c,e,t);else if(e.type==='ghost')drawGhost(c,e,t);else if(e.type==='bat')drawBat(c,e,t);else if(e.type==='beetle')drawBeetle(c,e,t);else if(e.type==='scor')drawScorpion(c,e,t);else if(e.type==='gob')drawGoblin(c,e,t);else if(e.type==='mon')drawMonkey(c,e,t);else drawSlime(c,e,t);}
 function drawSlime(c,e,t){
   c.save();c.translate(Math.round(e.x),Math.round(e.y));
   shadow(c,0,0,10,3.5,0.25);
@@ -2877,8 +2922,48 @@ function mkEnemy(type,x,y,boss){
   if(type==='beetle'){e.hp=5;e.state='wander';e.stT=rnd(0.4,1.2);e.fx=1;e.ax=0;e.ay=0;e.mvx=0;e.mvy=0;}
   if(type==='slime'||type==='fslime')e.hp=1;
   if(type==='mon'){e.hp=3;e.state='wander';e.stT=rnd(0.4,1.2);e.fx=1;e.ax=0;e.ay=0;e.mvx=0;e.mvy=0;e.thrown=false;}
+  if(type==='bro'){e.hp=16;e.mhp=16;e.bro=true;e.state='wander';e.stT=rnd(0.4,1.2);e.fx=1;e.ax=0;e.ay=0;e.mvx=0;e.mvy=0;e.bt=1.5;}
   if(type==='gob'||type==='scor'){e.hp=boss?12:(type==='scor'?3:4);e.state='wander';e.stT=rnd(0.4,1.2);e.fx=1;e.ax=0;e.ay=0;e.mvx=0;e.mvy=0;}
   enemies.push(e);return e;
+}
+function broAI(e,dt){
+  goblinAI(e,dt);
+  e.bt-=dt;
+  const dx=P.x-e.x,dy=P.y-e.y,d=Math.hypot(dx,dy)||1;
+  if(e.bt<=0&&d<300&&e.state!=='dash'){
+    const rage=e.hp<=6;e.bt=rage?1.5:2.3;
+    const base=Math.atan2(dy,dx),n=rage?5:3;
+    for(let k=0;k<n;k++){const a=base+(k-(n-1)/2)*0.27;projs.push({x:e.x+(e.fx||1)*10,y:e.y-16,vx:Math.cos(a)*125,vy:Math.sin(a)*125,key:e.key,t:0,mag:true});}
+    puff(e.x+(e.fx||1)*10,e.y-30,'#d98cff',8,70);
+  }
+}
+function brotherDown(){
+  G.brother=true;shake=0.6;
+  openDialog({name:'Grimsby',pages:['Enough... enough! Take your boy, brother.','I only wanted a little magic of my own. I never thought to simply ask.','The orbs crumble to dust and the cave stops humming. Tuck is safe.'],onEnd:()=>{toast('Grimsby is defeated! Talk to Tuck.');}});
+}
+function drawBrother(c,e,t){
+  c.save();c.translate(Math.round(e.x),Math.round(e.y));
+  const f=e.flash>0,wind=e.state==='wind';
+  shadow(c,0,0,16,5);
+  c.scale(1.45,1.45);
+  c.translate(wind?Math.sin(t*60)*1.1:0,-Math.abs(Math.sin(t*5+e.ph)*0.8));
+  if((e.fx||1)<0)c.scale(-1,1);
+  const robe=f?'#fff':'#3b1f5a',trim=f?'#fff':'#8a4ac8',skin=f?'#fff':'#e0b090',hat=f?'#fff':'#2a1442',beard=f?'#fff':'#55556a';
+  c.fillStyle=robe;c.beginPath();c.moveTo(-9,-1);c.lineTo(-6,-20);c.lineTo(6,-20);c.lineTo(9,-1);c.closePath();c.fill();
+  c.fillStyle=trim;c.fillRect(-9,-3,18,2);c.fillRect(-1,-20,2,18);
+  c.fillStyle=f?'#fff':'#5a3a22';c.fillRect(9,-27,2,27);
+  const gl=0.6+0.4*Math.sin(t*6);
+  circ(c,f?'#fff':'rgba(220,120,255,'+gl+')',10,-29,5.5);circ(c,f?'#fff':'#f6d6ff',10,-29,2.4);
+  circ(c,skin,0,-24,6);
+  c.fillStyle=beard;c.beginPath();c.moveTo(-5,-22);c.lineTo(5,-22);c.lineTo(0,-9);c.closePath();c.fill();
+  R(c,f?'#fff':'#ff3a3a',-3,-26,2,2);R(c,f?'#fff':'#ff3a3a',1,-26,2,2);
+  c.fillStyle=hat;c.beginPath();c.moveTo(-9,-28);c.lineTo(9,-28);c.lineTo(3,-50);c.lineTo(-1,-49);c.closePath();c.fill();
+  c.fillStyle=trim;c.fillRect(-9,-31,18,3);
+  c.restore();
+  const w=44,hp=clamp(e.hp/(e.mhp||16),0,1);
+  ctx.save();ctx.fillStyle='rgba(0,0,0,.6)';ctx.fillRect(Math.round(e.x-w/2),Math.round(e.y-92),w,6);
+  ctx.fillStyle='#d94a8a';ctx.fillRect(Math.round(e.x-w/2)+1,Math.round(e.y-91),(w-2)*hp,4);ctx.restore();
+  if(wind)txt('!',Math.round(e.x),Math.round(e.y-98),24,'#ff5a4a','center');
 }
 function goblinAI(e,dt){
   const dx=P.x-e.x,dy=P.y-e.y,d=Math.hypot(dx,dy)||1;
@@ -2941,11 +3026,11 @@ function leaveScreen(){screenLeft[scrKey(scr.sx,scr.sy)]=now;projs.length=0;}
 
 /* ================= SAVE ================= */
 const SAVE='canny-gnome-v1';
-function save(){try{localStorage.setItem(SAVE,JSON.stringify({c:P.coins,m:P.maxHp,h:P.hp,l:P.lvl,q:G.quest,k:G.kills,x:(L===OVER?P.x:L.ret.x),y:(L===OVER?P.y:L.ret.y),g:G.king?1:0,w:G.warden?1:0,o:G.opened,v:visited,wv:2,wp:P.wpn,ws:G.weapons,it:G.items}));}catch(e){}}
+function save(){try{localStorage.setItem(SAVE,JSON.stringify({c:P.coins,m:P.maxHp,h:P.hp,l:P.lvl,q:G.quest,k:G.kills,x:(L===OVER?P.x:L.ret.x),y:(L===OVER?P.y:L.ret.y),g:G.king?1:0,w:G.warden?1:0,o:G.opened,ob:G.orbs,bd:G.brother?1:0,in:G.intro?1:0,v:visited,wv:2,wp:P.wpn,ws:G.weapons,it:G.items}));}catch(e){}}
 function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');return s&&typeof s==='object'?s:null;}catch(e){return null;}}
 function resetGame(){
   P.x=24*TS+16;P.y=19*TS+28;P.hp=6;P.maxHp=6;P.coins=0;P.lvl=1;P.inv=0;P.kx=P.ky=0;P.swing=0;P.cool=0;P.fx=0;P.fy=1;P.d4x=0;P.d4y=1;
-  G.quest=0;G.kills=0;G.king=false;G.warden=false;G.opened=[];P.wpn='cane';G.weapons=['cane'];G.items={apple:0,cider:0,tonic:0};
+  G.orbs=[];G.brother=false;G.intro=false;G.sealBroken=false;G.quest=0;G.kills=0;G.king=false;G.warden=false;G.opened=[];P.wpn='cane';G.weapons=['cane'];G.items={apple:0,cider:0,tonic:0};
   for(let j=0;j<NSY;j++)for(let i=0;i<NSX;i++)visited[j][i]=0;
   NPCS.forEach(n=>{n.n=0;});
 }
@@ -2955,6 +3040,7 @@ function startGame(cont){
   const s=cont?loadSave():null;
   if(s){
     P.coins=s.c|0;P.maxHp=clamp(s.m|0||6,6,16);P.hp=clamp(s.h|0||P.maxHp,1,P.maxHp);P.lvl=clamp(s.l|0||1,1,3);G.quest=s.q|0;G.kills=s.k|0;G.king=!!s.g;G.warden=!!s.w;G.opened=Array.isArray(s.o)?s.o.filter(k=>typeof k==='string'):[];
+    G.orbs=Array.isArray(s.ob)?s.ob.filter(k=>ORBS.some(o=>o.k===k)):[];G.brother=!!s.bd;G.intro=!!s['in'];
     if(Array.isArray(s.ws))G.weapons=['cane'].concat(WORDER.filter(k=>k!=='cane'&&s.ws.includes(k)));
     if(s.wp&&G.weapons.includes(s.wp))P.wpn=s.wp;
     if(s.it&&typeof s.it==='object')for(const k of IORDER)G.items[k]=clamp(s.it[k]|0,0,9);
@@ -2970,7 +3056,8 @@ function startGame(cont){
   Object.keys(SPAWN).forEach(k=>{const ab=k.split(',').map(Number);if(!(ab[0]===sx&&ab[1]===sy)){const sp=SPAWN[k];spawnEnemies(ab[0],ab[1],sp.n,sp.type);}});
   enterScreen(sx,sy);
   mode='play';
-  toast(s?'Welcome back, Canny!':'Find Mayor Pebblewick in the village hall plaza.');
+  if(!G.intro){G.intro=true;openDialog({name:'',pages:INTRO_PAGES});}
+  else toast('Welcome back, Canny!');
 }
 
 /* ================= DIALOG ================= */
@@ -3036,7 +3123,7 @@ function doHits(){
     if(Math.abs(angDiff(Math.atan2(ey,ex),P.aim))>arcWidth()/2+0.12&&d>14)continue;
     P.hit.add(e);const armored=(e.type==='beetle'&&(e.state==='roll'||e.state==='wind'))||(e.type==='ghost'&&e.phase);e.hp-=armored?0:wpnDmg();e.flash=armored?0:0.16;
     const l=d||1,kb=e.boss?70:170;e.kx=ex/l*kb;e.ky=ey/l*kb;e.hopT=0;
-    if(e.type==='gob'||e.type==='scor'){e.state='rest';e.stT=e.boss?0.35:0.5;e.mvx=e.mvy=0;}
+    if(e.type==='gob'||e.type==='scor'||e.type==='bro'){e.state='rest';e.stT=e.boss?0.35:0.5;e.mvx=e.mvy=0;}
     if(e.type==='mon'){e.state='rest';e.stT=0.45;e.mvx=e.mvy=0;}
     if(e.type==='bat'){e.state='flit';e.stT=0.25;}
     if(e.type==='beetle'&&!armored){e.state='rest';e.stT=0.5;}
@@ -3046,12 +3133,12 @@ function doHits(){
 }
 function killEnemy(e){
   const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);
-  const gob=e.type==='gob'||e.type==='scor',tough=e.type==='mon'||e.type==='beetle'||e.type==='bat'||e.type==='ghost';
+  const gob=e.type==='gob'||e.type==='scor'||e.type==='bro',tough=e.type==='mon'||e.type==='beetle'||e.type==='bat'||e.type==='ghost';
   puff(e.x,e.y-6,e.type==='scor'||e.type==='beetle'?'#c9854a':e.type==='ghost'?'#cfe4ff':e.skel?'#e8e4d0':e.type==='bat'?'#6a4a8a':e.type==='fslime'?'#9fe0ff':e.type==='mon'?'#b5835a':gob?'#8fbf4a':'#6fd04a',gob||tough?16:12,110);Snd.pop();
   const n=gob?(e.boss?10:2+(Math.random()<0.5?1:0)):tough?2+(Math.random()<0.5?1:0):1+(Math.random()<0.5?1:0);
   for(let k=0;k<n;k++)pickups.push({x:e.x+rnd(-12,12),y:e.y+rnd(-8,8),type:'coin',t:Math.random()*6,key:e.key});
   if(e.boss||Math.random()<(gob||tough?0.3:0.18))pickups.push({x:e.x,y:e.y,type:'heart',t:0,key:e.key});
-  if(e.boss){pickups.push({x:e.x,y:e.y-10,type:'jar',t:0,key:e.key});if(e.ice){G.warden=true;toast('The Frost Warden is defeated!');for(let k=0;k<6;k++)pickups.push({x:e.x+rnd(-16,16),y:e.y+rnd(-10,10),type:'coin',t:Math.random()*6,key:e.key});}else{G.king=true;toast('The Goblin King is defeated!');}shake=0.5;}
+  if(e.boss){pickups.push({x:e.x,y:e.y-10,type:'jar',t:0,key:e.key});if(e.bro){brotherDown();}else if(e.ice){G.warden=true;toast('The Frost Warden is defeated!');for(let k=0;k<6;k++)pickups.push({x:e.x+rnd(-16,16),y:e.y+rnd(-10,10),type:'coin',t:Math.random()*6,key:e.key});}else{G.king=true;toast('The Goblin King is defeated!');}shake=0.5;}
   else if(e.type==='slime'&&G.quest===1){G.kills++;toast(G.kills>=8?'Slimes bonked! Return to the Mayor.':'Slimes bonked: '+G.kills+' of 8');}
 }
 function hurtPlayer(n,fromX,fromY){
@@ -3301,13 +3388,17 @@ function updateWorld(dt){
   // world-edge message on the roads
   const tx=Math.floor(P.x/TS),ty=Math.floor((P.y-5)/TS);
   if(L===OVER&&(tx<=-OX||ty<=-OY||tx>=MW-1||ty>=MH-1)&&at(tx,ty)===T.PATH&&now-edgeToastT>4){edgeToastT=now;toast('The road goes on, but the map ends here. For now.');}
-  if(!fade){const pt=PORTAL[L.id+':'+tx+','+ty];if(pt){startFade(pt.go);return;}}
+  if(!fade){const pt=PORTAL[L.id+':'+tx+','+ty];if(pt){
+    const gm=pt.gate?pt.gate():null;
+    if(gm){if(now-gateT>2){gateT=now;openDialog({name:'Sealed Cave',pages:gm});}P.y=(ty+1)*TS+26;P.kx=P.ky=0;return;}
+    startFade(pt.go);return;}}
   // enemies
   const key=scrKey(scr.sx,scr.sy),x0=scr.sx*VW+12,x1=(scr.sx+1)*VW-12,y0=scr.sy*VH+16,y1=(scr.sy+1)*VH-6;
   for(const e of enemies){
     if(e.key!==key)continue;
     e.t+=dt;e.flash=Math.max(0,e.flash-dt);
     if(e.type==='gob'||e.type==='scor')goblinAI(e,dt);
+    else if(e.type==='bro')broAI(e,dt);
     else if(e.type==='mon')monkeyAI(e,dt);
     else if(e.type==='ghost')ghostAI(e,dt);
     else if(e.type==='bat')batAI(e,dt);
@@ -3615,6 +3706,90 @@ function snesLayer(){
   }
   lctx.putImageData(LAYOUT,0,0);
 }
+/* ---- WebGL finishing pass for the 64-bit mode: smooth 2x upscale, bloom, real light sources, tilt-shift, crisp 2x UI ---- */
+const uiCv=document.createElement('canvas');uiCv.width=VW*2;uiCv.height=VH*2;
+const uictx=uiCv.getContext('2d');
+let GLX=null;
+(function(){
+  try{
+    const c=document.createElement('canvas');c.width=VW*2;c.height=VH*2;
+    const gl=c.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});
+    if(!gl)return;
+    const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;};
+    const pr=gl.createProgram();
+    gl.attachShader(pr,sh(gl.VERTEX_SHADER,`#version 300 es
+in vec2 p;out vec2 tc;void main(){tc=vec2(p.x*.5+.5,.5-p.y*.5);gl_Position=vec4(p,0.,1.);}`));
+    gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,`#version 300 es
+precision highp float;
+uniform sampler2D uW,uU;uniform vec2 uRes;uniform float uT;uniform vec3 uL[16];uniform int uNL;
+in vec2 tc;out vec4 o;
+vec3 fx(vec2 q){return texelFetch(uW,ivec2(clamp(q,vec2(0.),uRes-1.)),0).rgb;}
+bool eq(vec3 a,vec3 b){return dot(abs(a-b),vec3(1.))<0.14;}
+void main(){
+  vec2 pix=tc*uRes;vec2 ip=floor(pix),f=fract(pix);
+  vec3 P=fx(ip),A=fx(ip+vec2(0.,-1.)),B=fx(ip+vec2(1.,0.)),C=fx(ip+vec2(-1.,0.)),D=fx(ip+vec2(0.,1.));
+  vec3 E0=P,E1=P,E2=P,E3=P;
+  if(eq(C,A)&&!eq(C,D)&&!eq(A,B))E0=A;
+  if(eq(A,B)&&!eq(A,C)&&!eq(B,D))E1=B;
+  if(eq(D,C)&&!eq(D,B)&&!eq(C,A))E2=C;
+  if(eq(B,D)&&!eq(B,A)&&!eq(D,C))E3=D;
+  vec3 col=f.x<.5?(f.y<.5?E0:E2):(f.y<.5?E1:E3);
+  // tilt-shift: soften the top and bottom of the picture
+  float ts=smoothstep(.72,1.,abs(tc.y-.5)*2.);
+  col=mix(col,textureLod(uW,tc,1.7).rgb,ts*.85);
+  // bloom from the bright parts
+  vec3 bl=vec3(0.);
+  bl+=max(textureLod(uW,tc,2.).rgb-.80,0.);bl+=max(textureLod(uW,tc,3.).rgb-.76,0.)*1.1;bl+=max(textureLod(uW,tc,4.).rgb-.72,0.)*1.3;
+  col+=bl*.40;
+  // warm point lights
+  for(int i=0;i<16;i++){
+    if(i>=uNL)break;
+    float d=length(pix-uL[i].xy)/uL[i].z;
+    float g=exp(-d*d*2.6)*(0.88+.12*sin(uT*9.+float(i)*2.3));
+    col+=vec3(1.,.64,.3)*g*(.16+.30*dot(col,vec3(.33)));
+  }
+  // sun from the upper left, cool shade lower right
+  col*=mix(vec3(1.07,1.03,.91),vec3(.89,.95,1.07),clamp(tc.x*.5+tc.y*.5,0.,1.));
+  // grade
+  float l=dot(col,vec3(.3,.59,.11));col=mix(vec3(l),col,1.08);col=(col-.5)*1.06+.5;
+  // vignette
+  vec2 vq=(tc-.5)*vec2(1.05,1.25);col*=1.-.42*pow(length(vq)*1.1,2.6);
+  vec4 u=texture(uU,tc);col=mix(col,u.rgb,u.a);
+  o=vec4(clamp(col,0.,1.),1.);
+}`));
+    gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(pr));
+    gl.useProgram(pr);
+    const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    const mkTex=(unit,mip)=>{const t=gl.createTexture();gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,mip?gl.LINEAR_MIPMAP_LINEAR:gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);return t;};
+    mkTex(0,true);mkTex(1,false);
+    gl.uniform1i(gl.getUniformLocation(pr,'uW'),0);gl.uniform1i(gl.getUniformLocation(pr,'uU'),1);
+    gl.uniform2f(gl.getUniformLocation(pr,'uRes'),VW,VH);
+    GLX={c,gl,uT:gl.getUniformLocation(pr,'uT'),uL:gl.getUniformLocation(pr,'uL[0]'),uNL:gl.getUniformLocation(pr,'uNL'),arr:new Float32Array(48)};
+    c.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:auto;pointer-events:none;display:none';
+    c.setAttribute('aria-hidden','true');
+    const fr=cv.parentElement;fr.style.position='relative';fr.appendChild(c);
+  }catch(e){GLX=null;try{console.warn('GL off',e);}catch(_){}}
+})();
+function glActive(){return !!GLX&&GFX>=3;}
+function glHide(){if(GLX&&GLX.c.style.display!=='none'){GLX.c.style.display='none';cv.style.opacity='1';}}
+function glPresent(cx,cy){
+  const {c,gl,arr}=GLX;
+  if(c.style.display==='none'){c.style.display='block';cv.style.opacity='0';}
+  let n=0;
+  const tx0=Math.floor(cx/TS),ty0=Math.floor(cy/TS),tx1=Math.ceil((cx+VW)/TS),ty1=Math.ceil((cy+VH)/TS);
+  for(let y=Math.max(L.y0,ty0-2);y<Math.min(L.y0+L.h,ty1+2)&&n<16;y++)for(let x=Math.max(L.x0,tx0-2);x<Math.min(L.x0+L.w,tx1+2)&&n<16;x++){
+    const t=map[ixf(x,y)];if(!LIGHTS.has(t))continue;
+    arr[n*3]=x*TS+16-cx;arr[n*3+1]=y*TS+12-cy;arr[n*3+2]=t===T.LANTERN?60:80;n++;
+  }
+  gl.viewport(0,0,c.width,c.height);
+  gl.activeTexture(gl.TEXTURE0);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,cv);gl.generateMipmap(gl.TEXTURE_2D);
+  gl.activeTexture(gl.TEXTURE1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,uiCv);
+  gl.uniform1f(GLX.uT,now);gl.uniform1i(GLX.uNL,n);gl.uniform3fv(GLX.uL,arr);
+  gl.drawArrays(gl.TRIANGLES,0,3);
+}
 const SHC=document.createElement('canvas');SHC.width=VW;SHC.height=VH;const shc=SHC.getContext('2d');
 function dropShadow(){
   if(!('filter' in ctx))return;
@@ -3688,6 +3863,18 @@ function drawWorld(cx,cy){
 }
 function inView(x,y,cx,cy,m){return x>cx-m&&x<cx+VW+m&&y>cy-m&&y<cy+VH+m+40;}
 let darkCv=null;
+function drawMagic(cx,cy){
+  ctx.save();
+  ctx.fillStyle='rgba(110,60,210,0.20)';ctx.fillRect(0,0,VW,VH);
+  for(let i=0;i<46;i++){
+    const bx=hash(i,1,500)*VW,by=hash(i,2,500)*VH,ph=hash(i,3,500)*TAU;
+    const x=(bx+Math.sin(now*0.5+ph)*14+VW)%VW,y=(by-((now*(6+hash(i,4,500)*10))%VH)+VH)%VH;
+    const a=0.25+0.55*(0.5+0.5*Math.sin(now*2.2+ph)),col=i%3===0?'255,150,255':i%3===1?'140,220,255':'255,255,255';
+    ctx.fillStyle='rgba('+col+','+a+')';ctx.fillRect(Math.round(x),Math.round(y),2,2);
+    if(i%5===0){ctx.fillRect(Math.round(x)-2,Math.round(y)+.5,6,1);ctx.fillRect(Math.round(x)+.5,Math.round(y)-2,1,6);}
+  }
+  ctx.restore();
+}
 function caveDark(cx,cy){
   if(!darkCv){
     const W=1100,H=860;darkCv=document.createElement('canvas');darkCv.width=W;darkCv.height=H;
@@ -3781,12 +3968,16 @@ function drawHUD(){
   for(let i=0;i<P.maxHp/2;i++){const hp=P.hp-i*2;drawHeart(11+i*18,10,hp>=2?2:hp===1?1:0);}
   circ(ctx,'#f2c14e',17,35,5.5);circ(ctx,'#c99a2e',17,35,3);
   txt('x '+P.coins,27,40,15,'#f2c14e');
+  if(G.intro){
+    ctx.fillStyle='rgba(22,34,28,.7)';ctx.fillRect(6,52,82,18);
+    ORBS.forEach((o,i)=>{const got=G.orbs.includes(o.k),x=17+i*15;circ(ctx,'#0b120e',x,61,6);if(got){circ(ctx,o.col,x,61,4.6);circ(ctx,'#fff',x-1.4,59.6,1.4);}else circ(ctx,'#2c3a34',x,61,4);});
+  }
   let qs=null;
   if(G.quest===1)qs=G.kills>=8?'Quest: report to the Mayor':'Quest: bonk slimes '+G.kills+'/8';
   else if(G.quest===3)qs=G.king?'Quest: report to the Mayor':'Quest: defeat the Goblin King';
   if(qs){
     ctx.font='14px '+FONT;const w=ctx.measureText(qs).width+14;
-    ctx.fillStyle='rgba(22,34,28,.7)';ctx.fillRect(6,52,w,20);txt(qs,13,67,14,'#f1ead6');
+    const qy=G.intro?74:52;ctx.fillStyle='rgba(22,34,28,.7)';ctx.fillRect(6,qy,w,20);txt(qs,13,qy+15,14,'#f1ead6');
   }
   // mini-map: nine screens, with the road ends sticking out
   if(L!==OVER){
@@ -3794,6 +3985,35 @@ function drawHUD(){
     ctx.fillStyle='rgba(22,34,28,.75)';ctx.fillRect(VW-6-w,6,w,22);txt(L.name,VW-6-w/2,22,14,'#f1ead6','center');
     return;
   }
+}
+/* ---- screen numbers: 1..162 are the overworld (row by row from the top-left), then every cave / house / room screen ---- */
+let SCRBASE=null,SCRTOTAL=0;
+function screenNo(lv,sx,sy){
+  if(!SCRBASE){SCRBASE={over:0};let n=NSX*NSY;for(const id of Object.keys(LV)){if(id==='over')continue;const l=LV[id];SCRBASE[id]=n;n+=(l.sx1-l.sx0+1)*(l.sy1-l.sy0+1);}SCRTOTAL=n;}
+  if(lv.id==='over')return (sy+NORTH)*NSX+(sx+WEST)+1;
+  return (SCRBASE[lv.id]||0)+(sy-lv.sy0)*(lv.sx1-lv.sx0+1)+(sx-lv.sx0)+1;
+}
+let SNO=1;try{const v=localStorage.getItem('canny-sno');if(v==='0'||v==='1'||v==='2')SNO=+v;}catch(e){}
+function drawScreenNo(){
+  if(!SNO||mode==='title'||mode==='menu'||mode==='shop'||mode==='fish')return;
+  const n=screenNo(L,scr.sx,scr.sy);
+  if(SNO===2){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;
+    const ox=((-cam.x%128)+128)%128,oy=((-cam.y%128)+128)%128;
+    ctx.beginPath();
+    for(let x=ox;x<VW;x+=128){ctx.moveTo(Math.round(x)+.5,0);ctx.lineTo(Math.round(x)+.5,VH);}
+    for(let y=oy;y<VH;y+=128){ctx.moveTo(0,Math.round(y)+.5);ctx.lineTo(VW,Math.round(y)+.5);}
+    ctx.stroke();
+    ctx.globalAlpha=.16;ctx.font='bold 120px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';ctx.fillText(String(n),VW/2,VH/2);
+    ctx.restore();
+  }
+  const t=(L===OVER?'':L.name+'  ')+'Screen '+n;
+  ctx.save();ctx.font='14px '+FONT;
+  const w=ctx.measureText(t).width+14,x=VW-w-6,y=VH-26;
+  ctx.fillStyle='rgba(22,34,28,.8)';ctx.fillRect(x,y,w,20);ctx.strokeStyle='#f2c14e';ctx.lineWidth=1;ctx.strokeRect(x+.5,y+.5,w-1,19);
+  ctx.restore();
+  txt(t,x+7,y+15,14,'#f1ead6');
 }
 function drawBanner(){
   if(!banner||mode==='title'||mode==='menu'||mode==='shop'||mode==='fish')return;
@@ -3868,13 +4088,16 @@ function render(){
   if(L===OVER&&mode!=='title')drawWindFx();
   if(L===OVER&&mode!=='title')drawBlizzFx();
   if(L===OVER&&mode!=='title')drawMist(cx,cy);
+  if(L.magic&&mode!=='title')drawMagic(cx,cy);
   if(L!==OVER&&L.dark&&mode!=='title')caveDark(cx,cy);
-  vignette();
+  const GLON=glActive(),worldCtx=ctx;
+  if(GLON){ctx=uictx;ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,VW,VH);}
+  else vignette();
   if(mode==='fish')drawFish();
-  const gfxPending=GFX===1;if(GFX>=2)fx32();if(GFX>=3)fx64();
+  const gfxPending=GFX===1;if(!GLON){if(GFX>=2)fx32();if(GFX>=3)fx64();}
   if(mode==='title')drawTitle();
   else{
-    drawHUD();
+    drawHUD();drawScreenNo();
     drawBanner();
     if(mode==='menu')drawMenu();
     if(mode==='shop')drawShop();
@@ -3895,6 +4118,7 @@ function render(){
     }
   }
   if(gfxPending)snesGrade();
+  if(GLON){ctx=worldCtx;glPresent(cx,cy);}else glHide();
 }
 
 function drawSnowfall(cx,cy){
@@ -3949,6 +4173,7 @@ function press(a){
 }
 const KEYS={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'atk',KeyJ:'atk',KeyE:'talk',Enter:'talk',KeyK:'talk',KeyM:'mute',KeyN:'new',KeyI:'menu',Tab:'menu',Escape:'back',KeyQ:'quick'};
 window.addEventListener('keydown',e=>{
+  if(e.code==='KeyV'&&!e.repeat&&mode!=='fish'){SNO=(SNO+1)%3;try{localStorage.setItem('canny-sno',String(SNO));}catch(_){}toast(['Screen numbers off','Screen numbers on','Screen numbers + grid'][SNO]);e.preventDefault();return;}
   if(e.code==='KeyG'&&!e.repeat&&mode!=='fish'){GFX=(GFX+3)%4;SNES=GFX>0;try{localStorage.setItem('canny-gfx2',String(GFX));}catch(_){}toast(['Classic graphics','16-bit graphics','32-bit graphics','64-bit graphics'][GFX]);e.preventDefault();return;}
   const a=KEYS[e.code];if(!a)return;
   e.preventDefault();
@@ -3981,9 +4206,10 @@ hasSave=!!loadSave();
 visited[1+NORTH][1+WEST]=1;
 spawnCritters();
 initTumble();
-if(window.__TEST__){window.__dbg={WIND,BLIZ,blizFactor,TUMBLE,windFactor,areaName,get banner(){return banner;},openMenu,openShop,shopBuy,useItem,quickHeal,WPNS,themeNow,hurtPlayer,spawnEnemies,SPAWN,projs,WEST,HOUSES,startFishing,get F(){return F;},fishPress,CRIT,P,G,map,NPCS,enemies,pickups,info,SOLID,T,held,press,update,render,get mode(){return mode;},get scr(){return scr;},get dlg(){return dlg;},reach,inb,solidBox,startGame,toastQ,MW,MH,TS,PORTAL,LV,OVER,OX,OY,AW,setLevel,get L(){return L;},CHESTS,tick:(n)=>{for(let i=0;i<n;i++)update(0.03);}};}
+if(window.__TEST__){window.__dbg={info,CHESTS,PORTAL,screenNo,get SCRTOTAL(){screenNo(OVER,0,0);return SCRTOTAL;},LV,WIND,BLIZ,blizFactor,TUMBLE,windFactor,areaName,get banner(){return banner;},openMenu,openShop,shopBuy,useItem,quickHeal,WPNS,themeNow,hurtPlayer,spawnEnemies,SPAWN,projs,WEST,HOUSES,startFishing,get F(){return F;},fishPress,CRIT,P,G,map,NPCS,enemies,pickups,info,SOLID,T,held,press,update,render,get mode(){return mode;},get scr(){return scr;},get dlg(){return dlg;},reach,inb,solidBox,startGame,toastQ,MW,MH,TS,PORTAL,LV,OVER,OX,OY,AW,setLevel,get L(){return L;},CHESTS,tick:(n)=>{for(let i=0;i<n;i++)update(0.03);}};}
 else requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame);});
 })();
+
 
 </script>
 </body>
