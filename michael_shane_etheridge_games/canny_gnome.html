@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Canny Gnome</title>
+<title>Canny the Gnome</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Lora:ital,wght@0,500;1,400&display=swap">
@@ -51,7 +51,7 @@ kbd{font-family:var(--display);font-size:13px;color:var(--ink);background:var(--
 
 <main class="wrap">
   <header>
-    <h1>Canny <span>Gnome</span></h1>
+    <h1>Canny <span>the Gnome</span></h1>
     <p class="tag">A trusty cane, a pointy hat, and a map that keeps growing.</p>
   </header>
 
@@ -1093,7 +1093,7 @@ function leaveCave(){
 }
 let now=0,shrineT=-99;
 const P={x:24*TS+16,y:19*TS+28,fx:0,fy:1,d4x:0,d4y:1,kx:0,ky:0,hp:6,maxHp:6,coins:0,lvl:1,wpn:'cane',inv:0,walk:0,swing:0,swingDur:0.26,cool:0,hit:null,aim:0,moving:false,flash:0};
-const G={quest:0,kills:0,king:false,warden:false,opened:[],weapons:['cane'],items:{apple:0,cider:0,tonic:0},orbs:[],brother:false,intro:false};
+const G={sq:{},areas:[],quest:0,kills:0,king:false,warden:false,opened:[],weapons:['cane'],items:{apple:0,cider:0,tonic:0},orbs:[],brother:false,intro:false};
 const ORBS=[{k:'ember',name:'Ember Orb',col:'#ff5a3a'},{k:'frost',name:'Frost Orb',col:'#5ab8ff'},{k:'sun',name:'Sun Orb',col:'#ffd34a'},{k:'moss',name:'Verdigris Orb',col:'#4fd08a'},{k:'aurora',name:'Aurora Orb',col:'#c07aff'}];
 const ORB_HINT={ember:'the Goblin Hold, deep in the Stonecap Mountains',frost:'the Frozen Keep, on the island in the Frozen Lake',sun:'the Copper Mine, the west cave of Copper Hill',moss:'the Verdigris Cavern, the east cave of Copper Hill',aurora:'the Glacier Cavern, in Glacier Reach'};
 function storyHint(){
@@ -1101,6 +1101,108 @@ function storyHint(){
   if(G.orbs.length>=5)return 'All five orbs! The Magic Cave is just south-east of the village. Go and bring Tuck home, Canny.';
   const o=ORBS.find(q=>!G.orbs.includes(q.k));
   return 'Orbs found: '+G.orbs.length+' of 5. Grimsby hid the '+o.name+' in '+ORB_HINT[o.k]+'.';
+}
+/* ---- side quests: each NPC may hand out one small job. G.sq[id]={s:1 active | 2 ready to hand in | 3 done, n:progress} ---- */
+const SIDE=[
+ {id:'monkeys',npc:'baker',title:'Sticky-Fingered Monkeys',kind:'kill',need:4,match:e=>e.type==='mon',obj:'Bonk 4 jungle monkeys',
+  offer:['Canny! Those jungle monkeys stole a whole sack of my sugar. Again!','Bonk four of them for me, south of the village, and I will make it worth your while. Deal?'],
+  done:['Four monkeys bonked and my sugar is safe! Here, take these. You earned them.'],reward:{coins:35,items:{apple:2}}},
+ {id:'beetles',npc:'smith',title:'Beetle Shell Scrap',kind:'kill',need:3,match:e=>e.type==='beetle',obj:'Bonk 3 beetles in the Copper Hill caves',
+  offer:['Hmph. Those armoured beetles in the Copper Hill caves have shells harder than my anvil.','Bring me three bonked beetles and I will see what I can make of the scrap. A spear, maybe. Interested?'],
+  done:['Good shell, this. Look at that grain! Here, a spear, forged from the scraps. Do not say I never gave you anything.'],reward:{weapon:'spear'}},
+ {id:'ballad',npc:'bard',title:"Tilda's Ballad",kind:'area',areas:['Coconut Cove','Mirror Lake','Glacier Reach'],obj:'Visit Coconut Cove, Mirror Lake and Glacier Reach',
+  offer:['I am writing a ballad about you, Canny, but I have never seen half the places in it!','Walk through Coconut Cove, Mirror Lake and Glacier Reach and tell me what they are like. I will pay for the verses. Interested?'],
+  done:['Palm trees, a mirror-bright lake, a glacier... oh, it is going to be a masterpiece. Here is your fee!'],reward:{coins:45}},
+ {id:'drawing',npc:'kid',title:"Pip's Drawing",kind:'deliver',target:'granny',obj:'Deliver Pip\'s drawing to Granny Moss',
+  offer:['Canny, I drew a picture of Granny Moss and her snail knocker! Can you take it to her? I am too shy.'],
+  deliver:['A drawing! Of me! And my snail! Oh, tell Pip it is going straight on the wall. Here, take a biscuit for the trip.'],
+  done:['Granny loved it?! Yes! Here, I saved this for you. It is not even sticky.'],reward:{coins:20,items:{cider:1}}},
+ {id:'bats',npc:'inn',title:'Bats in the Cellar',kind:'kill',need:4,match:e=>e.type==='bat',obj:'Bonk 4 bats in the caves',
+  offer:['Between you and me, Canny, bats keep getting into the inn cellar and bothering the cider barrels.','Bonk four of them in the caves and I will keep you in cider. Sound fair?'],
+  done:['Not a squeak from the cellar all night! Bless you. Cider is on me.'],reward:{coins:25,items:{cider:2}}},
+ {id:'bigfish',npc:'fisher',title:"Pike's Delivery",kind:'deliver',target:'brine',obj:'Deliver Pike\'s fish to Captain Brine',
+  offer:['I caught a whopper, Canny. A true whopper. The Captain at the pier is the only one who deserves it.','Carry it down to Captain Brine for me? I will make it worth your while.'],
+  deliver:['Ha! That is a fine one. Tell Pike I have not seen its like. Here, a coin for the walk.'],
+  done:['The Captain says it was a whopper! Knew it. Here is your share.'],reward:{coins:30}},
+ {id:'frostslimes',npc:'cora',title:'Marshmallow Mess',kind:'kill',need:4,match:e=>e.type==='fslime',obj:'Bonk 4 frost slimes in the snow',
+  offer:['The frost slimes keep sliming my cocoa pot! They love marshmallows more than I do.','Bonk four of them in the snowfields and I will pay you in cocoa and coin.'],
+  done:['Cocoa saved! Here, some tonic I brewed and a few coins. The slimes will be back, though. They always are.'],reward:{coins:30,items:{tonic:2}}},
+ {id:'scorpions',npc:'zahra',title:'Scorpion Trouble',kind:'kill',need:3,match:e=>e.type==='scor'&&!e.crab,obj:'Bonk 3 desert scorpions',
+  offer:['Scorpions keep nesting in my water jugs. WATER IS GOLD, Canny, and they are costing me gold!','Bonk three of them out in the dunes and I will pay you handsomely.'],
+  done:['My jugs, safe again! Here, as promised.'],reward:{coins:50}},
+ {id:'icegoblins',npc:'hilda',title:'Icy Intruders',kind:'kill',need:3,match:e=>e.type==='gob'&&e.ice&&!e.boss,obj:'Bonk 3 ice goblins in Glacier Reach',
+  offer:['Ice goblins have been creeping up on the lodge at night. A ranger can only guard so many doors.','Bonk three of them out there for me and I will see you rewarded.'],
+  done:['The lodge is quiet again. Thank you, Canny. Take this, with the thanks of the Glacier Rangers.'],reward:{coins:60}},
+ {id:'bones',npc:'mort',title:'Restless Bones',kind:'kill',need:3,match:e=>!!e.skel,obj:'Bonk 3 skeletons in the cemetery',
+  offer:['The skeletons wander off my cemetery at night, and the rattling keeps me awake.','Bonk three of them and I will pay you what I can. It is not much, mind. The dead are poor company.'],
+  done:['Quiet at last. Here is your pay, and my thanks. Mind how you go.'],reward:{coins:50}},
+];
+const NPC_NAME=id=>{const n=NPCS.find(q=>q.id===id);return n?n.name:id;};
+function sqSt(q){return G.sq[q.id];}
+function sqCheckAreas(){
+  for(const q of SIDE){
+    if(q.kind!=='area')continue;const st=sqSt(q);if(!st||st.s!==1)continue;
+    st.n=q.areas.filter(a=>G.areas.includes(a)).length;
+    if(st.n>=q.areas.length){st.s=2;toast('Quest ready! Return to '+NPC_NAME(q.npc));}
+  }
+}
+function sqArea(nm){if(!nm)return;if(!G.areas.includes(nm))G.areas.push(nm);sqCheckAreas();}
+function sqKill(e){
+  for(const q of SIDE){
+    if(q.kind!=='kill')continue;const st=sqSt(q);if(!st||st.s!==1||!q.match(e))continue;
+    st.n++;
+    if(st.n>=q.need){st.s=2;toast(q.title+': done! Return to '+NPC_NAME(q.npc));}
+    else toast(q.title+': '+st.n+' of '+q.need);
+  }
+}
+let sqSnooze={};
+function sqReward(q){
+  const r=q.reward||{},parts=[];
+  if(r.coins){P.coins+=r.coins;parts.push('+'+r.coins+' coins');}
+  if(r.items)for(const k in r.items){G.items[k]=Math.min(9,(G.items[k]|0)+r.items[k]);parts.push('+'+r.items[k]+' '+ITEMS[k].name);}
+  if(r.weapon&&!G.weapons.includes(r.weapon)){G.weapons.push(r.weapon);parts.push(wpnName(r.weapon)+' unlocked');}
+  Snd.up();toast('Quest complete: '+q.title+(parts.length?'  ('+parts.join(', ')+')':''));
+}
+function sqProgress(q,st){
+  if(q.kind==='kill')return st.n+'/'+q.need;
+  if(q.kind==='area')return st.n+'/'+q.areas.length;
+  return st.s>=2?'delivered':'not yet delivered';
+}
+function sideTalk(npc){
+  for(const q of SIDE){
+    const st=sqSt(q);
+    if(q.kind==='deliver'&&q.target===npc.id&&st&&st.s===1)
+      return {pages:q.deliver,onEnd:()=>{st.s=2;st.n=1;toast('Delivered! Return to '+NPC_NAME(q.npc));}};
+    if(q.npc!==npc.id)continue;
+    if(!st){
+      if((sqSnooze[q.id]||0)>now)continue;
+      return {pages:q.offer,choices:[{label:'I will help!',fn:()=>{G.sq[q.id]={s:1,n:0};if(q.kind==='area')sqCheckAreas();toast('New quest: '+q.title);return q.obj+'.';}},{label:'Not now',fn:()=>{sqSnooze[q.id]=now+45;return 'Another time, then.';}}]};
+    }
+    if(st.s===2)return {pages:q.done,onEnd:()=>{st.s=3;sqReward(q);}};
+  }
+  return null;
+}
+function sqActiveCount(){return SIDE.filter(q=>sqSt(q)&&sqSt(q).s<3).length;}
+function drawQuestTab(){
+  txt('Story',34,72,15,'#f2c14e');
+  ORBS.forEach((o,i)=>{const x=392+i*20;circ(ctx,'#0b120e',x,67,8);circ(ctx,G.orbs.includes(o.k)?o.col:'#2c3a34',x,67,6);});
+  const main=G.brother?'Rescue Tuck: done! Grimsby is beaten.':'Rescue Tuck: orbs '+G.orbs.length+' of 5. '+(G.orbs.length>=5?'Enter the Magic Cave!':'Next: '+ORBS.find(o=>!G.orbs.includes(o.k)).name);
+  txt(main,40,92,14,'#f1ead6');
+  txt('Side quests',34,120,15,'#f2c14e');
+  let y=142,found=0;
+  for(const st0 of [1,2,3])for(const q of SIDE){
+    const st=sqSt(q);if(!st||st.s!==st0)continue;found++;
+    if(y>330)continue;
+    const mark=st.s===3?'[x] ':st.s===2?'[!] ':'[ ] ';
+    const col=st.s===3?'#7d8a80':st.s===2?'#f2c14e':'#f1ead6';
+    txt(mark+q.title,34,y,14,col);
+    txt(st.s===3?'done':st.s===2?'return to '+NPC_NAME(q.npc):sqProgress(q,st),478,y,13,'#a9b7a1','right');
+    y+=22;
+  }
+  if(!found)txt('None yet. Chat to the villagers, some of them need a hand.',34,142,14,'#a9b7a1');
+  const act=SIDE.find(q=>sqSt(q)&&sqSt(q).s===1);
+  if(act)txt('Now: '+act.obj,34,328,13,'#cfe0c4');
+  txt(SIDE.length-found>0?(SIDE.length-found)+' more quests to find':'You have found every side quest!',34,350,12,'#a9b7a1');
 }
 const INTRO_PAGES=['Canny Gnome came home from the garden to find the front door swinging wide open. Tuck, his son, was gone.','On the table lay a note: "I have taken the boy. He is ENCHANTED, brother, and magic like that belongs with someone who knows what to do with it. Do not follow me. Grimsby."','Grimsby has locked himself in the Magic Cave, south-east of the village, behind a seal of five glowing sockets.','Five magic orbs lie hidden in five dungeons: the Goblin Hold, the Frozen Keep, the Copper Mine, the Verdigris Cavern and the Glacier Cavern. Find them all, open the cave and bring Tuck home!'];
 let Snd; // defined below, used lazily
@@ -1167,7 +1269,7 @@ function menuEntries(){return WORDER.filter(k=>G.weapons.includes(k)).map(k=>({t
 function closeOverlay(){mode='play';SH=null;MN=null;save();}
 function pressMenu(a){
   if(a==='menu'||a==='back'||a==='atk'){closeOverlay();return;}
-  if(a==='left'||a==='right'){MN.tab=1-MN.tab;Snd.blip();return;}
+  if(a==='left'||a==='right'){MN.tab=(MN.tab+(a==='right'?1:2))%3;Snd.blip();return;}
   if(MN.tab!==0)return;
   const en=menuEntries();
   if(a==='up'){MN.sel=(MN.sel+en.length-1)%en.length;Snd.blip();}
@@ -1247,7 +1349,7 @@ function worldMapImage(){
 }
 function drawMenu(){
   panel(16,12,480,360);
-  const tabs=['Items','Map'];
+  const tabs=['Items','Map','Quests'];
   tabs.forEach((t,i)=>{
     const x=34+i*110;
     ctx.fillStyle=MN.tab===i?'#e0553f':'rgba(22,34,28,.8)';ctx.fillRect(x,22,100,24);
@@ -1255,7 +1357,6 @@ function drawMenu(){
     txt(t,x+50,40,16,MN.tab===i?'#fff':'#a9b7a1','center');
   });
   txt('Coins: '+P.coins,478,40,15,'#f2c14e','right');
-  if(G.intro){txt('Orbs',262,40,14,'#f1ead6');ORBS.forEach((o,i)=>{const x=312+i*18;circ(ctx,'#0b120e',x,35,7);circ(ctx,G.orbs.includes(o.k)?o.col:'#2c3a34',x,35,5);});}
   if(MN.tab===0){
     const en=menuEntries();
     txt('Weapons',34,72,15,'#f2c14e');txt('Supplies',276,72,15,'#f2c14e');
@@ -1286,8 +1387,8 @@ function drawMenu(){
         txt(G.items[cur.k]>0?'Press Enter to use it.':'You have none. Shops sell supplies.',40,322,14,'#a9b7a1');
       }
     }
-    txt('Up/Down choose   Enter use or equip   Left/Right Map   I or Esc close   Q quick-heal',256,356,12,'#a9b7a1','center');
-  }else{
+    txt('Up/Down choose   Enter use or equip   Left/Right tabs   I or Esc close   Q quick-heal',256,356,12,'#a9b7a1','center');
+  }else if(MN.tab===2){drawQuestTab();}else{
     const k=Math.min(1.75,440/(NSX*16)),cw=16*k,ch=12*k,mx=Math.round((VW-NSX*cw)/2),my=62;
     const ov=worldMapImage();
     ctx.imageSmoothingEnabled=false;
@@ -3014,7 +3115,7 @@ function areaName(tx,ty){
 }
 function enterScreen(sx,sy){
   scr={sx,sy};
-  if(L===OVER){const nm=areaName(sx*SCW+8,sy*SCH+6);if(nm!==areaShown){areaShown=nm;banner={t:nm,life:3.4};}}
+  if(L===OVER){const nm=areaName(sx*SCW+8,sy*SCH+6);sqArea(nm);if(nm!==areaShown){areaShown=nm;banner={t:nm,life:3.4};}}
   if(L===OVER)visited[sy+NORTH][sx+WEST]=1;
   const sp=(L===OVER)?SPAWN[sx+','+sy]:null;
   if(sp){
@@ -3025,21 +3126,27 @@ function enterScreen(sx,sy){
 function leaveScreen(){screenLeft[scrKey(scr.sx,scr.sy)]=now;projs.length=0;}
 
 /* ================= SAVE ================= */
-const SAVE='canny-gnome-v1';
-function save(){try{localStorage.setItem(SAVE,JSON.stringify({c:P.coins,m:P.maxHp,h:P.hp,l:P.lvl,q:G.quest,k:G.kills,x:(L===OVER?P.x:L.ret.x),y:(L===OVER?P.y:L.ret.y),g:G.king?1:0,w:G.warden?1:0,o:G.opened,ob:G.orbs,bd:G.brother?1:0,in:G.intro?1:0,v:visited,wv:2,wp:P.wpn,ws:G.weapons,it:G.items}));}catch(e){}}
-function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');return s&&typeof s==='object'?s:null;}catch(e){return null;}}
+const SAVE_KEYS=['canny-gnome-v1','canny-gnome-slot2','canny-gnome-slot3'];
+let SLOT=0,tSel=0,tConfirm=null,tConfT=0;
+const slotData=[null,null,null];
+function readSlot(i){try{const s=JSON.parse(localStorage.getItem(SAVE_KEYS[i])||'null');return s&&typeof s==='object'?s:null;}catch(e){return null;}}
+function refreshSlots(){for(let i=0;i<3;i++)slotData[i]=readSlot(i);hasSave=!!slotData[tSel];}
+function save(){try{localStorage.setItem(SAVE_KEYS[SLOT],JSON.stringify({c:P.coins,m:P.maxHp,h:P.hp,l:P.lvl,q:G.quest,k:G.kills,x:(L===OVER?P.x:L.ret.x),y:(L===OVER?P.y:L.ret.y),g:G.king?1:0,w:G.warden?1:0,o:G.opened,ob:G.orbs,sq:G.sq,ar:G.areas,bd:G.brother?1:0,in:G.intro?1:0,v:visited,wv:2,wp:P.wpn,ws:G.weapons,it:G.items}));}catch(e){}}
+function loadSave(){return readSlot(SLOT);}
 function resetGame(){
   P.x=24*TS+16;P.y=19*TS+28;P.hp=6;P.maxHp=6;P.coins=0;P.lvl=1;P.inv=0;P.kx=P.ky=0;P.swing=0;P.cool=0;P.fx=0;P.fy=1;P.d4x=0;P.d4y=1;
-  G.orbs=[];G.brother=false;G.intro=false;G.sealBroken=false;G.quest=0;G.kills=0;G.king=false;G.warden=false;G.opened=[];P.wpn='cane';G.weapons=['cane'];G.items={apple:0,cider:0,tonic:0};
+  G.sq={};G.areas=[];G.orbs=[];G.brother=false;G.intro=false;G.sealBroken=false;G.quest=0;G.kills=0;G.king=false;G.warden=false;G.opened=[];P.wpn='cane';G.weapons=['cane'];G.items={apple:0,cider:0,tonic:0};
   for(let j=0;j<NSY;j++)for(let i=0;i<NSX;i++)visited[j][i]=0;
   NPCS.forEach(n=>{n.n=0;});
 }
-function startGame(cont){
+function startGame(cont,slot){
+  if(slot!=null)SLOT=slot;
   areaShown=null;banner=null;
   setLevel(OVER);fade=null;resetGame();
   const s=cont?loadSave():null;
   if(s){
     P.coins=s.c|0;P.maxHp=clamp(s.m|0||6,6,16);P.hp=clamp(s.h|0||P.maxHp,1,P.maxHp);P.lvl=clamp(s.l|0||1,1,3);G.quest=s.q|0;G.kills=s.k|0;G.king=!!s.g;G.warden=!!s.w;G.opened=Array.isArray(s.o)?s.o.filter(k=>typeof k==='string'):[];
+    G.sq={};if(s.sq&&typeof s.sq==='object')for(const q of SIDE){const v=s.sq[q.id];if(v&&(v.s===1||v.s===2||v.s===3))G.sq[q.id]={s:v.s,n:v.n|0};}G.areas=Array.isArray(s.ar)?s.ar.filter(a=>typeof a==='string').slice(0,60):[];
     G.orbs=Array.isArray(s.ob)?s.ob.filter(k=>ORBS.some(o=>o.k===k)):[];G.brother=!!s.bd;G.intro=!!s['in'];
     if(Array.isArray(s.ws))G.weapons=['cane'].concat(WORDER.filter(k=>k!=='cane'&&s.ws.includes(k)));
     if(s.wp&&G.weapons.includes(s.wp))P.wpn=s.wp;
@@ -3056,6 +3163,7 @@ function startGame(cont){
   Object.keys(SPAWN).forEach(k=>{const ab=k.split(',').map(Number);if(!(ab[0]===sx&&ab[1]===sy)){const sp=SPAWN[k];spawnEnemies(ab[0],ab[1],sp.n,sp.type);}});
   enterScreen(sx,sy);
   mode='play';
+  if(!s)save();
   if(!G.intro){G.intro=true;openDialog({name:'',pages:INTRO_PAGES});}
   else toast('Welcome back, Canny!');
 }
@@ -3093,7 +3201,7 @@ function tryTalk(){
   const tg=findTarget();if(!tg)return;
   Snd.blip();
   if(tg.type==='pet'){const c=tg.c;if(c.kind!=='deer'){c.vx=c.vy=0;c.t=1.2;c.run=false;}if(c.kind==='deer'){toast('The deer sniffs your hand, blinks slowly, then bounds off.');const a=Math.atan2(c.y-P.y,c.x-P.x);c.vx=Math.cos(a)*100;c.vy=Math.sin(a)*80;c.run=true;c.t=1.2;return;}toast(c.kind==='dog'?'You pet the dog. Woof!':'You pet the cat. Purr...');return;}
-  if(tg.type==='npc'){const n=tg.npc;const sp=n.talk();sp.name=n.name;openDialog(sp);}
+  if(tg.type==='npc'){const n=tg.npc;const sp=sideTalk(n)||n.talk();sp.name=n.name;openDialog(sp);}
   else openDialog(info[tg.key]);
 }
 function tryAttack(){
@@ -3133,6 +3241,7 @@ function doHits(){
 }
 function killEnemy(e){
   const i=enemies.indexOf(e);if(i>=0)enemies.splice(i,1);
+  sqKill(e);
   const gob=e.type==='gob'||e.type==='scor'||e.type==='bro',tough=e.type==='mon'||e.type==='beetle'||e.type==='bat'||e.type==='ghost';
   puff(e.x,e.y-6,e.type==='scor'||e.type==='beetle'?'#c9854a':e.type==='ghost'?'#cfe4ff':e.skel?'#e8e4d0':e.type==='bat'?'#6a4a8a':e.type==='fslime'?'#9fe0ff':e.type==='mon'?'#b5835a':gob?'#8fbf4a':'#6fd04a',gob||tough?16:12,110);Snd.pop();
   const n=gob?(e.boss?10:2+(Math.random()<0.5?1:0)):tough?2+(Math.random()<0.5?1:0):1+(Math.random()<0.5?1:0);
@@ -3603,7 +3712,7 @@ function update(dt){
   now+=dt;
   Snd.music(themeNow(),now);
   updateFx(dt);
-  if(mode==='title'){titleT+=dt;return;}
+  if(mode==='title'){titleT+=dt;if(tConfT>0){tConfT-=dt;if(tConfT<=0)tConfirm=null;}return;}
   if(dlg){
     const full=dlg.pages[dlg.i].length;
     if(dlg.t<full){const before=Math.floor(dlg.t);dlg.t=Math.min(full,dlg.t+dt*48);if(Math.floor(dlg.t)!==before&&Math.floor(dlg.t)%3===0)Snd.blip();}
@@ -3975,6 +4084,9 @@ function drawHUD(){
   let qs=null;
   if(G.quest===1)qs=G.kills>=8?'Quest: report to the Mayor':'Quest: bonk slimes '+G.kills+'/8';
   else if(G.quest===3)qs=G.king?'Quest: report to the Mayor':'Quest: defeat the Goblin King';
+  const sqn=SIDE.filter(q=>sqSt(q)&&sqSt(q).s<3).slice(0,2);
+  let sy2=(G.intro?74:52)+(qs?24:0);
+  for(const q of sqn){const st=sqSt(q),t=(st.s===2?'Side: return to '+NPC_NAME(q.npc):'Side: '+q.title+' '+sqProgress(q,st));ctx.font='13px '+FONT;const w=ctx.measureText(t).width+14;ctx.fillStyle='rgba(22,34,28,.7)';ctx.fillRect(6,sy2,w,19);txt(t,13,sy2+14,13,st.s===2?'#f2c14e':'#cfe0c4');sy2+=22;}
   if(qs){
     ctx.font='14px '+FONT;const w=ctx.measureText(qs).width+14;
     const qy=G.intro?74:52;ctx.fillStyle='rgba(22,34,28,.7)';ctx.fillRect(6,qy,w,20);txt(qs,13,qy+15,14,'#f1ead6');
@@ -4141,23 +4253,102 @@ function drawHeat(){
   if(L!==OVER||scr.sx>-4||scr.sy<0||scr.sy>2)return;
   ctx.save();ctx.globalAlpha=0.07+0.02*Math.sin(now*1.5);ctx.fillStyle='#ffb347';ctx.fillRect(0,0,VW,VH);ctx.restore();
 }
+const TSTARS=Array.from({length:60},(_,i)=>({x:(i*97.3)%512,y:(i*53.7)%190,r:i%7===0?1.6:1,p:i*1.7}));
+const TFLY=Array.from({length:14},(_,i)=>({x:(i*71)%512,y:240+(i*37)%110,p:i*2.1,s:0.4+(i%4)*0.15}));
 function drawTitle(){
-  ctx.fillStyle='rgba(12,24,18,.62)';ctx.fillRect(0,0,VW,VH);
-  txt('CANNY GNOME',VW/2,112,50,'#f2c14e','center');
-  txt('a trusty cane. a pointy hat. a village to look after.',VW/2,140,16,'#f1ead6','center');
-  ctx.save();ctx.translate(VW/2,0);ctx.scale(2.4,2.4);
-  const sw=(titleT%2.4)<0.5?(titleT%2.4)/0.5:null;
-  drawGnome(ctx,0,112,'d',titleT*0.3,sw,0.4,hasSave?Math.max(1,loadSave()?.l|0||1):1,now,false,2.2);
+  const t=titleT;
+  // sky
+  const g=ctx.createLinearGradient(0,0,0,VH);
+  g.addColorStop(0,'#0e1230');g.addColorStop(.5,'#3a2f63');g.addColorStop(.78,'#b4587a');g.addColorStop(1,'#f0a35e');
+  ctx.fillStyle=g;ctx.fillRect(0,0,VW,VH);
+  // stars
+  for(const s of TSTARS){ctx.globalAlpha=.45+.45*Math.sin(t*1.8+s.p);ctx.fillStyle='#fff';ctx.fillRect(s.x,s.y,s.r,s.r);}
+  ctx.globalAlpha=1;
+  // moon
+  ctx.fillStyle='rgba(255,244,200,.18)';ctx.beginPath();ctx.arc(420,70,34,0,7);ctx.fill();
+  ctx.fillStyle='#fff4c8';ctx.beginPath();ctx.arc(420,70,22,0,7);ctx.fill();
+  ctx.fillStyle='#e8dba8';ctx.beginPath();ctx.arc(412,64,4,0,7);ctx.arc(428,78,3,0,7);ctx.fill();
+  // far hills
+  ctx.fillStyle='#4a3a6e';ctx.beginPath();ctx.moveTo(0,VH);
+  for(let x=0;x<=512;x+=16)ctx.lineTo(x,262+Math.sin(x*.018+1)*22+Math.sin(x*.05)*6);
+  ctx.lineTo(512,VH);ctx.fill();
+  // village silhouettes
+  ctx.fillStyle='#2b2347';
+  [[60,282,34,24],[120,288,28,20],[330,284,36,26],[388,290,26,18],[450,282,30,24]].forEach(([x,y,w,h])=>{
+    ctx.fillRect(x,y,w,h);ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+w/2,y-14);ctx.lineTo(x+w+4,y);ctx.fill();
+    ctx.fillStyle='#ffd27a';ctx.globalAlpha=.7+.2*Math.sin(t*2+x);ctx.fillRect(x+w/2-3,y+8,6,6);ctx.globalAlpha=1;ctx.fillStyle='#2b2347';
+  });
+  // near hills
+  ctx.fillStyle='#1d3a2c';ctx.beginPath();ctx.moveTo(0,VH);
+  for(let x=0;x<=512;x+=16)ctx.lineTo(x,318+Math.sin(x*.02+3)*14+Math.sin(x*.07)*4);
+  ctx.lineTo(512,VH);ctx.fill();
+  ctx.fillStyle='#142b20';ctx.fillRect(0,352,VW,32);
+  // pines
+  ctx.fillStyle='#10241a';
+  [[24,330,1],[470,326,1.1],[500,336,.8],[8,344,.7]].forEach(([x,y,s])=>{
+    for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x-14*s+i*2,y-i*16*s+10*s);ctx.lineTo(x,y-i*16*s-14*s);ctx.lineTo(x+14*s-i*2,y-i*16*s+10*s);ctx.fill();}
+    ctx.fillRect(x-2,y+10*s,4,10);
+  });
+  // gnome on a ridge
+  ctx.save();ctx.translate(VW/2,0);ctx.scale(2.2,2.2);
+  const sw=(t%3)<0.5?(t%3)/0.5:null;
+  drawGnome(ctx,0,128,'d',t*0.3,sw,0.4,slotData[tSel]?Math.max(1,slotData[tSel].l|0||1):1,now,false,2.2);
   ctx.restore();
-  if(Math.floor(now*2)%2===0)txt(hasSave?'Press Enter to continue':'Press Enter to begin',VW/2,326,20,'#fff','center');
-  txt(hasSave?'N: start a new game':'WASD to walk, Space to swing the cane',VW/2,352,14,'#a9b7a1','center');
+  // fireflies
+  for(const f of TFLY){
+    const x=(f.x+Math.sin(t*f.s+f.p)*24+512)%512,y=f.y+Math.cos(t*f.s*1.3+f.p)*10,a=.4+.6*Math.sin(t*2+f.p);
+    ctx.globalAlpha=Math.max(0,a)*.35;ctx.fillStyle='#d8ff7a';ctx.beginPath();ctx.arc(x,y,5,0,7);ctx.fill();
+    ctx.globalAlpha=Math.max(0,a);ctx.fillRect(x-1,y-1,2,2);
+  }
+  ctx.globalAlpha=1;
+  // logo
+  const by=Math.sin(t*1.2)*2;
+  txt('CANNY',VW/2,64+by,58,'#f2c14e','center',true);
+  txt('the',VW/2-118,100+by,24,'#f1ead6','center',true);
+  txt('GNOME',VW/2+10,108+by,58,'#e7653c','center',true);
+  txt('a trusty cane. a pointy hat. a village to look after.',VW/2,134,15,'#f1ead6','center',true);
+  // save slots
+  const blink=Math.floor(now*2)%2===0;
+  for(let i=0;i<3;i++){
+    const x=23+i*158,y=288,w=150,h=58,d=slotData[i],sel=i===tSel;
+    ctx.fillStyle=sel?'rgba(20,12,40,.88)':'rgba(10,8,24,.66)';ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle=sel?'#f2c14e':'rgba(241,234,214,.35)';ctx.lineWidth=sel?2:1;ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+    txt((sel&&blink?'\u25B6 ':'')+'Save '+(i+1),x+8,y+16,14,sel?'#f2c14e':'#f1ead6');
+    if(d){
+      const hp=clamp(d.m|0||6,6,16)/2,orbs=Array.isArray(d.ob)?d.ob.length:0;
+      txt('Level '+clamp(d.l|0||1,1,3)+'   '+(d.bd?'Tuck saved!':orbs+'/5 orbs'),x+8,y+33,11,'#f1ead6');
+      txt('\u2665 '+hp+'   coins '+(d.c|0),x+8,y+49,11,'#e9a0a0');
+    }else txt('- empty -',x+8,y+38,12,'#a9a3b8');
+  }
+  const cf=tConfirm&&tConfT>0;
+  if(cf)txt(tConfirm==='new'?'Press N again to overwrite Save '+(tSel+1):'Press Delete again to erase Save '+(tSel+1),VW/2,366,12,'#ff9d8a','center',true);
+  else txt(slotData[tSel]?'\u2190\u2192 choose   Enter: continue   N: new game   Del: erase':'\u2190\u2192 choose   Enter: begin a new adventure',VW/2,366,12,'#d9cdb0','center',true);
+  txt('G: graphics mode',VW-8,16,11,'#d9cdb0','right',true);
 }
 
 /* ================= INPUT ================= */
+function titlePress(a){
+  const d=slotData[tSel];
+  if(a==='left'||a==='up'){tSel=(tSel+2)%3;tConfirm=null;hasSave=!!slotData[tSel];return;}
+  if(a==='right'||a==='down'){tSel=(tSel+1)%3;tConfirm=null;hasSave=!!slotData[tSel];return;}
+  if(a==='talk'||a==='atk'){startGame(!!d,tSel);return;}
+  if(a==='new'){
+    if(!d||tConfirm==='new'){tConfirm=null;startGame(false,tSel);}
+    else{tConfirm='new';tConfT=3;}
+    return;
+  }
+  if(a==='del'){
+    if(!d)return;
+    if(tConfirm==='del'){try{localStorage.removeItem(SAVE_KEYS[tSel]);}catch(e){}tConfirm=null;refreshSlots();}
+    else{tConfirm='del';tConfT=3;}
+    return;
+  }
+  tConfirm=null;
+}
 function press(a){
   Snd.init();
   if(a==='mute'){const m=Snd.toggle();toast(m?'Sound off':'Sound on');return;}
-  if(mode==='title'){if(a==='talk'||a==='atk')startGame(hasSave);else if(a==='new')startGame(false);return;}
+  if(mode==='title'){titlePress(a);return;}
   if(mode==='fish'){fishPress(a);return;}
   if(mode==='menu'){pressMenu(a);return;}
   if(mode==='shop'){pressShop(a);return;}
@@ -4171,7 +4362,7 @@ function press(a){
   }
   if(a==='atk')tryAttack();else if(a==='talk')tryTalk();
 }
-const KEYS={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'atk',KeyJ:'atk',KeyE:'talk',Enter:'talk',KeyK:'talk',KeyM:'mute',KeyN:'new',KeyI:'menu',Tab:'menu',Escape:'back',KeyQ:'quick'};
+const KEYS={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'atk',KeyJ:'atk',KeyE:'talk',Enter:'talk',KeyK:'talk',KeyM:'mute',KeyN:'new',Delete:'del',Backspace:'del',KeyI:'menu',Tab:'menu',Escape:'back',KeyQ:'quick'};
 window.addEventListener('keydown',e=>{
   if(e.code==='KeyV'&&!e.repeat&&mode!=='fish'){SNO=(SNO+1)%3;try{localStorage.setItem('canny-sno',String(SNO));}catch(_){}toast(['Screen numbers off','Screen numbers on','Screen numbers + grid'][SNO]);e.preventDefault();return;}
   if(e.code==='KeyG'&&!e.repeat&&mode!=='fish'){GFX=(GFX+3)%4;SNES=GFX>0;try{localStorage.setItem('canny-gfx2',String(GFX));}catch(_){}toast(['Classic graphics','16-bit graphics','32-bit graphics','64-bit graphics'][GFX]);e.preventDefault();return;}
@@ -4182,7 +4373,13 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>{const a=KEYS[e.code];if(a&&held.hasOwnProperty(a))held[a]=0;});
 window.addEventListener('blur',()=>{for(const k in held)held[k]=0;});
-cv.addEventListener('pointerdown',()=>{try{cv.focus();}catch(e){}Snd.init();if(mode==='title')press('talk');else if(dlg)press('talk');});
+function titleClick(ev){
+  try{const r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*VW,y=(ev.clientY-r.top)/r.height*VH;
+    for(let i=0;i<3;i++){const bx=23+i*158;if(x>=bx&&x<=bx+150&&y>=288&&y<=346){if(tSel===i)startGame(!!slotData[i],i);else{tSel=i;tConfirm=null;hasSave=!!slotData[i];}return;}}
+  }catch(e){}
+  startGame(!!slotData[tSel],tSel);
+}
+cv.addEventListener('pointerdown',ev=>{try{cv.focus();}catch(e){}Snd.init();if(mode==='title')titleClick(ev);else if(dlg)press('talk');});
 const pad=document.getElementById('pad');
 try{if(pad&&window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)pad.hidden=false;}catch(e){}
 if(pad){
@@ -4202,11 +4399,11 @@ function frame(ts){
   requestAnimationFrame(frame);
 }
 try{document.fonts&&document.fonts.load&&document.fonts.load('16px "Pixelify Sans"');}catch(e){}
-hasSave=!!loadSave();
+refreshSlots();
 visited[1+NORTH][1+WEST]=1;
 spawnCritters();
 initTumble();
-if(window.__TEST__){window.__dbg={info,CHESTS,PORTAL,screenNo,get SCRTOTAL(){screenNo(OVER,0,0);return SCRTOTAL;},LV,WIND,BLIZ,blizFactor,TUMBLE,windFactor,areaName,get banner(){return banner;},openMenu,openShop,shopBuy,useItem,quickHeal,WPNS,themeNow,hurtPlayer,spawnEnemies,SPAWN,projs,WEST,HOUSES,startFishing,get F(){return F;},fishPress,CRIT,P,G,map,NPCS,enemies,pickups,info,SOLID,T,held,press,update,render,get mode(){return mode;},get scr(){return scr;},get dlg(){return dlg;},reach,inb,solidBox,startGame,toastQ,MW,MH,TS,PORTAL,LV,OVER,OX,OY,AW,setLevel,get L(){return L;},CHESTS,tick:(n)=>{for(let i=0;i<n;i++)update(0.03);}};}
+if(window.__TEST__){window.__dbg={info,CHESTS,PORTAL,screenNo,sideTalk,SIDE,sqKill,sqArea,get SCRTOTAL(){screenNo(OVER,0,0);return SCRTOTAL;},LV,WIND,BLIZ,blizFactor,TUMBLE,windFactor,areaName,get banner(){return banner;},openMenu,openShop,shopBuy,useItem,quickHeal,WPNS,themeNow,hurtPlayer,spawnEnemies,SPAWN,projs,WEST,HOUSES,startFishing,get F(){return F;},fishPress,CRIT,P,G,map,NPCS,enemies,pickups,info,SOLID,T,held,press,update,render,get mode(){return mode;},get scr(){return scr;},get dlg(){return dlg;},reach,inb,solidBox,startGame,toastQ,MW,MH,TS,PORTAL,LV,OVER,OX,OY,AW,setLevel,get L(){return L;},CHESTS,tick:(n)=>{for(let i=0;i<n;i++)update(0.03);}};}
 else requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame);});
 })();
 
