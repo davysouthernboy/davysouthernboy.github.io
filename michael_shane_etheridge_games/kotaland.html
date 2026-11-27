@@ -128,7 +128,7 @@ kbd{font:inherit;font-weight:800;font-size:12px;min-width:24px;height:24px;displ
   <div id="stats" class="hud panel">
     <div class="row">
       <div class="stat"><span class="k">Coins</span><b id="coins">0</b></div>
-      <div class="stat"><span class="k">Helped</span><b id="stars">0/130</b></div>
+      <div class="stat"><span class="k">Helped</span><b id="stars">0/152</b></div>
     </div>
     <div id="inv"></div>
   </div>
@@ -359,6 +359,53 @@ function signTex(txt,bg,fg){
 }
 function houseExtras(o,g,w,d,h,ry){
   var k=o.kind;
+  function wob(lx,lz,r){addObst(o.x+lx*Math.cos(ry)+lz*Math.sin(ry),o.z-lx*Math.sin(ry)+lz*Math.cos(ry),r)}
+  function blooms(lx,y,lz,n,spread){
+    var fc=[0xd9362f,0xf28ab0,0xf2c14e,0xb79bf0,0xffffff,0xff8c5a];
+    for(var q=0;q<n;q++){var b=new T.Mesh(new T.IcosahedronGeometry(.14,0),M(fc[q%6]));b.position.set(lx+(q%4-1.5)*spread/2,y+(q%3)*.05,lz+(Math.floor(q/4)-.5)*spread/2);g.add(b)}
+  }
+  if(k==='church'){
+    var tz=d/2-1.8,tt=h+4.2;
+    box(3.6,tt,3.6,o.wall,0,tt/2,tz,g);
+    var spg=new T.ConeGeometry(Math.SQRT2,3.8,4);spg.rotateY(Math.PI/4);
+    var spm=shadow(new T.Mesh(spg,M(0x3a4a5a)));spm.scale.set(2.0,1,2.0);spm.position.set(0,tt+1.9,tz);g.add(spm);
+    box(.14,1.4,.14,0xd9a93a,0,tt+4.3,tz,g);box(.7,.14,.14,0xd9a93a,0,tt+4.5,tz,g);
+    box(1.0,1.7,.12,0x1d1d22,0,h+2.8,d/2+.02,g);
+    var bl=shadow(new T.Mesh(new T.ConeGeometry(.3,.45,10),M(0xd9a93a)));bl.position.set(0,h+2.7,d/2-.6);g.add(bl);
+    var rw=new T.Mesh(new T.CircleGeometry(.62,16),windowMat);rw.position.set(0,4.0,d/2+.06);g.add(rw);
+    var rr2=new T.Mesh(new T.TorusGeometry(.62,.08,6,18),M(0x5a3a24));rr2.position.set(0,4.0,d/2+.07);g.add(rr2);
+    box(3.4,.2,1.4,0x9a968a,0,.1,d/2+1.1,g);
+    [-1,1].forEach(function(sx){[-4.5,-1,2.5].forEach(function(wz){
+      var pn=new T.Mesh(new T.PlaneGeometry(.9,2.2),windowMat);pn.position.set(sx*(w/2+.04),3.0,wz);pn.rotation.y=sx*Math.PI/2;g.add(pn);
+    })});
+    for(var gs=0;gs<6;gs++){
+      var gx=-3+(gs%3)*3,gz=-d/2-3-Math.floor(gs/3)*2.6;
+      box(.7,1.0,.2,0xa8a8a0,gx,.5,gz,g);box(.8,.18,.3,0x9a9a92,gx,1.05,gz,g);wob(gx,gz,.55);
+    }
+  }
+  if(k==='hardware'||k==='clinic'||k==='florist'){
+    var st={hardware:['HARDWARE','#3a3a40','#f2c14e',4.0],clinic:['CLINIC','#f4f4f4','#c23a3a',3.0],florist:['FLOWERS','#3f7a4a','#fbe6f0',2.4]}[k];
+    var sg2=new T.Mesh(new T.PlaneGeometry(st[3],st[3]/4),new T.MeshBasicMaterial({map:signTex(st[0],st[1],st[2])}));
+    sg2.position.set(0,h-.9,d/2+.1);g.add(sg2);
+  }
+  if(k==='hardware'){
+    [[-3.6,d/2+1.6],[-3.6,d/2+2.7]].forEach(function(c,i){box(.9,.9,.9,i?0xb08a5a:0x9a7248,c[0],.45,c[1],g);wob(c[0],c[1],.65)});
+    [[3.6,d/2+1.6],[4.6,d/2+2.3]].forEach(function(c){cyl(.4,.4,.9,0x6b4a2f,c[0],.45,c[1],g,8);wob(c[0],c[1],.5)});
+    var wbm=box(1.1,.35,.7,0xb0443a,3.4,.55,d/2+3.4,g);wbm.rotation.y=.3;wob(3.4,d/2+3.4,.7);
+    for(var pk=0;pk<4;pk++)box(2.4,.12,.3,pk%2?0xc9a46a:0xb08a5a,-w/2+1.4,.1+pk*.13,-d/2-1.0,g);
+  }
+  if(k==='clinic'){
+    box(.14,2.2,.14,0x5a3a24,3.8,1.1,d/2+2.4,g);box(1.1,1.1,.1,0xf4f4f4,3.8,2.5,d/2+2.4,g);
+    box(.7,.2,.12,0xc23a3a,3.8,2.5,d/2+2.46,g);box(.2,.7,.12,0xc23a3a,3.8,2.5,d/2+2.46,g);wob(3.8,d/2+2.4,.4);
+    box(2,.12,.6,0x8a6a48,-3.4,.5,d/2+1.9,g);box(2,.5,.1,0x8a6a48,-3.4,.8,d/2+2.2,g);wob(-3.4,d/2+1.9,.9);
+  }
+  if(k==='florist'){
+    [-1,1].forEach(function(sd){
+      box(2.0,.3,1.0,0x6b4a2f,sd*2.9,.15,d/2+1.6,g);blooms(sd*2.9,.5,d/2+1.6,12,1.6);wob(sd*2.9,d/2+1.6,.8);
+      box(1.2,.28,.4,0x7a5636,sd*w*.3,h*.62-.78,d/2+.3,g);blooms(sd*w*.3,h*.62-.55,d/2+.3,8,1.0);
+    });
+    for(var aw=0;aw<6;aw++){var an=box(.46,.08,1.2,aw%2?0xf4efe0:0xd9536f,-1.15+aw*.46,2.35,d/2+.8,g);an.rotation.x=.3}
+  }
   if(k==='museum'||k==='library'){
     var tex=signTex(k==='museum'?'MUSEUM':'LIBRARY',k==='museum'?'#2f3a4a':'#4a3a2a','#f0e2b8');
     var sg=new T.Mesh(new T.PlaneGeometry(4.2,1.05),new T.MeshBasicMaterial({map:tex}));sg.position.set(0,2.95,d/2+.1);g.add(sg);
@@ -553,6 +600,216 @@ NPC_DEFS.forEach(function(n){
   var lp=front(H.x,H.z,R.ry,H.d/2+2.2,-side*1.4);
   lamp(lp.x,lp.z);
 });
+
+/* ---------- Westhaven: the town at the end of the west road ---------- */
+var WT={x:-200,z:18};
+var WNPC={
+  alden:{id:'alden',name:'Father Alden',coat:0x2e2e36,hat:'none',hair:0xdddddd,pants:0x2e2e36,skin:0xe0b890},
+  hank:{id:'hank',name:'Hank',coat:0x4a7a3a,hat:'cap',hatColor:0xe0b030,hair:0x6a4a2a,beard:0x6a4a2a,apron:0x8a5a2a,pants:0x3a4a5a,skin:0xd9a47a},
+  nell:{id:'nell',name:'Dr. Nell',coat:0xf4f4f4,hat:'none',hair:0x5a3a2a,pants:0x3a4a6a,bow:0xd23a3a,skin:0xe3b896},
+  posy:{id:'posy',name:'Posy',coat:0xf08ab0,skirt:0xf6e7b0,hair:0xd9803a,longHair:0xd9803a,hat:'straw',bow:0xf2c14e,pants:0x4a4038,skin:0xe8c0a0},
+  pruitt:{id:'pruitt',name:'Mayor Pruitt',coat:0x6a2f3a,hat:'bucket',hatColor:0x2a2a30,hair:0x888888,beard:0x888888,pants:0x2a2a30,skin:0xe0b090},
+  dot:{id:'dot',name:'Dot',coat:0xf0b53a,skirt:0x4f7ab0,hair:0x6a3a1a,longHair:0x6a3a1a,bow:0xd9362f,hat:'none',pants:0x4a4038,skin:0xf1c9a1,scale:.72},
+  barnaby:{id:'barnaby',name:'Barnaby',coat:0x2f4a6a,hat:'cap',hatColor:0xe9e2d0,hair:0xeeeeee,beard:0xeeeeee,pants:0x3a3a4a,skin:0xd9a47a},
+  ruth:{id:'ruth',name:'Ruth',coat:0x8a6a4a,apron:0xfaf5e8,skirt:0x5a7a4a,hair:0xbbbbbb,hat:'none',pants:0x4a4038,skin:0xe3b896}
+};
+(function(){try{
+  var P=WT;
+  function toward(x,z,tx,tz){return Math.atan2(tx-x,tz-z)}
+  /* the west road */
+  var RD=[[-30,3],[-37,-5],[-60,-6],[-90,0],[-120,8],[-150,14],[-176,18],[-194,18]];
+  for(var i=0;i<RD.length-1;i++)addPath(RD[i][0],RD[i][1],RD[i+1][0],RD[i+1][1],3.2);
+  for(i=0;i<RD.length-1;i++){
+    var ax=RD[i][0],az=RD[i][1],bx=RD[i+1][0],bz=RD[i+1][1],L=Math.hypot(bx-ax,bz-az),nx=-(bz-az)/L,nz=(bx-ax)/L;
+    for(var t=14;t<L-4;t+=26){var sd=(i+Math.floor(t/26))%2?1:-1;lamp(ax+(bx-ax)*t/L+nx*2.6*sd,az+(bz-az)*t/L+nz*2.6*sd)}
+  }
+  function signPost(x,z,txt){
+    cyl(.07,.08,2.6,0x5a3a24,x,1.3,z,null,5);
+    var m=new T.Mesh(new T.PlaneGeometry(2.6,.65),new T.MeshBasicMaterial({map:signTex(txt,'#5a3a24','#f4e6c0')}));
+    m.position.set(x,2.5,z);m.rotation.y=Math.PI/2;scene.add(m);
+    var m2=m.clone();m2.rotation.y=-Math.PI/2;scene.add(m2);
+    addObst(x,z,.3);
+  }
+  signPost(-33.5,-2.5,'WESTHAVEN');
+  signPost(-166,22.5,'WESTHAVEN');
+  /* plaza and fountain */
+  var p1=shadow(new T.Mesh(new T.CylinderGeometry(7.4,7.4,.08,32),M(0xb9b2a0)),false,true);p1.position.set(P.x,.04,P.z);scene.add(p1);
+  var p2=shadow(new T.Mesh(new T.CylinderGeometry(5.0,5.0,.1,28),M(0xc9c3b0)),false,true);p2.position.set(P.x,.05,P.z);scene.add(p2);
+  cyl(2.1,2.3,.7,0x9a978d,P.x,.35,P.z,null,14);
+  var fw=new T.Mesh(new T.CylinderGeometry(1.75,1.75,.05,14),M(0x3d86aa));fw.position.set(P.x,.68,P.z);scene.add(fw);
+  cyl(.25,.3,1.7,0x9a978d,P.x,1.4,P.z,null,8);
+  var fb=shadow(new T.Mesh(new T.SphereGeometry(.42,10,8),M(0x9a978d)));fb.position.set(P.x,2.35,P.z);scene.add(fb);
+  addObst(P.x,P.z,2.5);
+  [[6.4,6.4],[-6.4,6.4],[6.4,-6.4],[-6.4,-6.4]].forEach(function(q){lamp(P.x+q[0],P.z+q[1])});
+  [[0,-5.8,0],[0,5.8,Math.PI]].forEach(function(b){
+    var bg=new T.Group();bg.position.set(P.x+b[0],0,P.z+b[1]);bg.rotation.y=b[2];scene.add(bg);
+    box(2,.12,.6,0x8a6a48,0,.5,0,bg);box(2,.5,.1,0x8a6a48,0,.8,-.3,bg);addObst(P.x+b[0],P.z+b[1],.9);
+  });
+  /* buildings */
+  var BLD=[
+    {id:'alden',x:-200,z:-10,ry:0,w:9,d:14,h:6,wall:0xe6dfd0,roof:0x4a4f66,roofH:4,kind:'church',name:'the Church'},
+    {id:'hank',x:-228,z:14,ry:Math.PI/2,w:9,d:7,h:4,wall:0xa65a3a,roof:0x4a3f3a,roofH:2.6,kind:'hardware',name:"Hank's Hardware"},
+    {id:'nell',x:-200,z:48,ry:Math.PI,w:8,d:6.5,h:4,wall:0xf0f2f4,roof:0x3f7fa8,roofH:2.6,kind:'clinic',name:"Dr. Nell's Clinic"},
+    {id:'posy',x:-176,z:2,w:6,d:5,h:3.2,wall:0xf6d8e6,roof:0x4f9a5a,kind:'florist',name:"Posy's Flowers"},
+    {id:'pruitt',x:-226,z:44,w:6,d:5,h:3.2,wall:0xd9c9a0,roof:0x6a2f3a,chimney:true,name:"Mayor Pruitt's house"},
+    {id:'dot',x:-172,z:44,w:4.6,d:4.2,h:2.8,wall:0xf4e2a0,roof:0xd0705a,name:"Dot's house"},
+    {id:'barnaby',x:-232,z:-10,w:5.4,d:4.6,h:3,wall:0x9ab0c0,roof:0x3f5f7a,chimney:true,name:"Barnaby's house"},
+    {id:'ruth',x:-170,z:-22,w:5.6,d:4.8,h:3.1,wall:0xe3c88f,roof:0xb0743a,chimney:true,name:"Ruth's house"},
+    {id:'wcot0',x:-214,z:66,w:4.8,d:4.4,h:2.8,wall:0xe8d6b8,roof:0x9a5a44,name:'Cottage'},
+    {id:'wcot1',x:-184,z:68,w:5.2,d:4.4,h:3.1,wall:0xc9d6c0,roof:0x6a7a4a,name:'Cottage'},
+    {id:'wcot2',x:-156,z:34,w:4.8,d:4.4,h:2.8,wall:0xd8c8d6,roof:0x7a5a7a,name:'Cottage'},
+    {id:'wcot3',x:-224,z:-30,w:5.2,d:4.4,h:3.1,wall:0xd9c0a8,roof:0x7a4a3a,name:'Cottage'},
+    {id:'wcot4',x:-188,z:-34,w:4.8,d:4.4,h:2.8,wall:0xdde6c8,roof:0x5f8a4a,name:'Cottage'}
+  ];
+  BLD.forEach(function(o){
+    if(o.ry==null)o.ry=toward(o.x,o.z,P.x,P.z);
+    var h=house(o);
+    var door=front(o.x,o.z,h.ry,o.d/2+1);
+    var vx=door.x-P.x,vz=door.z-P.z,vl=Math.hypot(vx,vz)||1;
+    addPath(door.x,door.z,P.x+vx/vl*5.4,P.z+vz/vl*5.4,2.4);
+    var lp=front(o.x,o.z,h.ry,o.d/2+2.2,2.6);lamp(lp.x,lp.z);
+    var nd=WNPC[o.id];
+    if(nd){var np=front(o.x,o.z,h.ry,o.d/2+2.6,-1.8);nd.x=np.x;nd.z=np.z;nd.homeYaw=h.ry;NPC_DEFS.push(nd)}
+  });
+}catch(e){}})();
+
+/* ---------- Hollow Cemetery and the lonely house ---------- */
+var CEM={x:-72,z:124};
+var GRAVE={x:-80.5,z:129.5};
+var GV=null,GHOSTMATS=[];
+function ghostify(m,d){
+  m.traverse(function(o){if(o.isMesh){var mat=new T.MeshStandardMaterial({color:0xb4c0dc,emissive:0x5470b8,emissiveIntensity:.4,transparent:true,opacity:.55,roughness:1,depthWrite:false});o.material=mat;o.castShadow=false;GHOSTMATS.push(mat)}});
+  m.userData.legs.forEach(function(l){l.visible=false});
+  d.ghost=true;
+}
+function graveSync(){
+  if(!GV)return;
+  var q=QS.edmund,done=qDone('edmund'),laid=done||q.delivered||q.i>=2;
+  GV.bq.visible=laid;GV.dead.visible=!laid;GV.bloom.visible=done;
+  GV.beam.visible=!done&&q.s==='active'&&!q.delivered&&curQ('edmund').kind==='deliver'&&inv.gbouquet>0;
+}
+function layBouquet(){
+  inv.gbouquet=0;QS.edmund.delivered=true;sfx.pick();toast('Flowers laid on the grave','good');
+  sparkle(GRAVE.x,1.2,GRAVE.z,0xffffff);refresh();
+}
+(function(){try{
+  var C=CEM,i;
+  /* path from the village to the cemetery gate */
+  var PTH=[[-8.2,32.8],[-14,56],[-22,76],[-38,94],[-56,106],[-72,111]];
+  for(i=0;i<PTH.length-1;i++)addPath(PTH[i][0],PTH[i][1],PTH[i+1][0],PTH[i+1][1],2.6);
+  [[1,2.4],[2,-2.4],[3,2.4]].forEach(function(q){
+    var a=PTH[q[0]],b=PTH[q[0]+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]),nx=-(b[1]-a[1])/L,nz=(b[0]-a[0])/L;
+    lamp((a[0]+b[0])/2+nx*q[1],(a[1]+b[1])/2+nz*q[1]);
+  });
+  function post(x,z,txt,ry){
+    cyl(.07,.08,2.6,0x3a3a40,x,1.3,z,null,5);
+    var m=new T.Mesh(new T.PlaneGeometry(2.6,.65),new T.MeshBasicMaterial({map:signTex(txt,'#2f3238','#d9d9d2')}));
+    m.position.set(x,2.5,z);m.rotation.y=ry;scene.add(m);
+    var m2=m.clone();m2.rotation.y=ry+Math.PI;scene.add(m2);addObst(x,z,.3);
+  }
+  post(-66.5,107.5,'CEMETERY',2.36);
+  post(-69,140,'OLD HOUSE',Math.PI);
+  /* ground */
+  var gr=new T.Mesh(new T.BoxGeometry(22,.05,24),M(0x4f6a42));gr.position.set(C.x,.03,C.z);gr.receiveShadow=true;scene.add(gr);
+  /* iron fence with two gates */
+  var X0=C.x-11,X1=C.x+11,Z0=C.z-12,Z1=C.z+12;
+  function ironFence(x1,z1,x2,z2){
+    var dx=x2-x1,dz=z2-z1,len=Math.hypot(dx,dz),n=Math.max(1,Math.round(len/1.5));
+    for(var k=0;k<=n;k++){
+      var x=x1+dx*k/n,z=z1+dz*k/n;
+      cyl(.06,.07,1.5,0x2a2a2e,x,.75,z,null,5);cyl(0,.09,.26,0x2a2a2e,x,1.62,z,null,4);addObst(x,z,.45);
+    }
+    for(var r=0;r<2;r++){var g=new T.Group();g.position.set((x1+x2)/2,.5+r*.6,(z1+z2)/2);g.rotation.y=Math.atan2(dx,dz);box(.06,.07,len,0x2a2a2e,0,0,0,g);scene.add(g)}
+  }
+  ironFence(X0,Z0,C.x-2.6,Z0);ironFence(C.x+2.6,Z0,X1,Z0);
+  ironFence(X0,Z1,C.x-2.6,Z1);ironFence(C.x+2.6,Z1,X1,Z1);
+  ironFence(X0,Z0,X0,Z1);ironFence(X1,Z0,X1,Z1);
+  [[C.x-2.6,Z0],[C.x+2.6,Z0],[C.x-2.6,Z1],[C.x+2.6,Z1]].forEach(function(p){
+    box(.7,2.3,.7,0x8a8a84,p[0],1.15,p[1]);box(.9,.2,.9,0x9a9a94,p[0],2.4,p[1]);addObst(p[0],p[1],.55);
+  });
+  addPath(C.x,Z0,C.x,Z1,2.4);
+  addPath(C.x,Z1,C.x,153,2.4);
+  /* graves */
+  var cols=[-80.5,-77,-67,-63.5],rows=[116,120,124,128,132],sc=[0x9a9a94,0x8a8a84,0xa8a8a0,0x7f8480],gi=0;
+  cols.forEach(function(gx,ci){rows.forEach(function(gz,ri){
+    if(ci===0&&gz>=128)return;
+    if(ci>=2&&gz>=131)return;
+    var t=(ci*5+ri)%4,col=sc[(ci+ri)%4],y=1;
+    var gg=new T.Group();gg.position.set(gx,0,gz);gg.rotation.y=((ci+ri)%3-1)*.09;scene.add(gg);
+    if(t===0){box(.9,1.0,.2,col,0,.5,0,gg);var tp=cyl(.45,.45,.2,col,0,1.0,0,gg,10);tp.rotation.x=Math.PI/2}
+    else if(t===1){box(.18,1.4,.16,col,0,.7,0,gg);box(.8,.18,.16,col,0,1.0,0,gg)}
+    else if(t===2){box(1.0,.75,.2,col,0,.38,0,gg)}
+    else{box(.55,1.2,.5,col,0,.6,0,gg);var oc=shadow(new T.Mesh(new T.ConeGeometry(.4,.5,4),M(col)));oc.position.y=1.45;oc.rotation.y=Math.PI/4;gg.add(oc)}
+    box(.7,.12,.24,0x4a6a3a,0,.06,.02,gg);
+    box(.9,.16,1.7,0x5a4a35,0,.08,-1.1,gg);
+    addObst(gx,gz,.55);gi++;
+  })});
+  function deadTree(x,z,s){
+    var tg=new T.Group();tg.position.set(x,0,z);tg.rotation.y=rnd()*6;scene.add(tg);
+    var tr=shadow(new T.Mesh(new T.CylinderGeometry(.14*s,.3*s,3.2*s,5),M(0x4a3a2a)));tr.position.y=1.6*s;tg.add(tr);
+    [[.9,2.3,0],[-.8,2.7,.4],[.3,3.0,-.8],[-.4,1.9,-.7]].forEach(function(b){var br=box(.08*s,1.3*s,.08*s,0x4a3a2a,b[0]*s*.6,b[1]*s,b[2]*s*.6,tg);br.rotation.z=b[0]>0?-.9:.9;br.rotation.x=b[2]*.5});
+    addObst(x,z,.6);
+  }
+  deadTree(-76.5,134.5,1.2);deadTree(-80.5,114.5,1.1);deadTree(-62.5,121,1);deadTree(-88,128,1.1);deadTree(-54,116,1.2);deadTree(-60,150,1);deadTree(-84,152,1.1);
+  /* mausoleum */
+  var mg=new T.Group();mg.position.set(-65.5,133,0);mg.position.y=0;mg.rotation.y=Math.PI;scene.add(mg);
+  mg.position.set(-65.5,0,133.2);
+  box(4,3,3.2,0x8a8a84,0,1.5,0,mg);box(4.4,.3,3.6,0x7a7a74,0,3.1,0,mg);box(3.4,.3,2.8,0x7a7a74,0,3.4,0,mg);
+  var mdr=box(1.1,2.1,.1,0x1d1d22,0,1.05,1.62,mg);box(1.5,.2,.2,0x9a9a94,0,2.2,1.65,mg);
+  box(.15,.7,.15,0x9a9a94,0,4.0,0,mg);box(.5,.15,.15,0x9a9a94,0,4.1,0,mg);
+  rectObst(-65.5,133.2,Math.PI,4.2,3.4,.2);
+  /* eerie lanterns */
+  [[C.x-9.5,C.z-10],[C.x+9.5,C.z-10],[C.x-9.5,C.z+10],[C.x+9.5,C.z+10]].forEach(function(p){
+    cyl(.05,.05,1.0,0x2a2a2e,p[0],.5,p[1],null,5);
+    var gl=new T.Mesh(new T.SphereGeometry(.14,8,6),new T.MeshStandardMaterial({color:0x9ad8ff,emissive:0x6ab8ff,emissiveIntensity:1.1}));gl.position.set(p[0],1.1,p[1]);scene.add(gl);addObst(p[0],p[1],.3);
+  });
+  /* Edmund's grave */
+  var G=GRAVE,sz2=G.z+1.4;
+  var sg=new T.Group();sg.position.set(G.x,0,sz2);scene.add(sg);
+  box(1.2,1.5,.24,0xb0b0a8,0,.75,0,sg);var stp=cyl(.6,.6,.24,0xb0b0a8,0,1.5,0,sg,12);stp.rotation.x=Math.PI/2;
+  var cv2=document.createElement('canvas');cv2.width=128;cv2.height=128;var c2=cv2.getContext('2d');
+  c2.fillStyle='#b0b0a8';c2.fillRect(0,0,128,128);c2.fillStyle='#4a4a46';c2.textAlign='center';c2.font='bold 24px Georgia,serif';c2.fillText('EDMUND',64,56);c2.font='16px Georgia,serif';c2.fillText('HOLLOW',64,80);c2.fillText('1802 - 1858',64,104);
+  var pq=new T.Mesh(new T.PlaneGeometry(1.0,1.0),new T.MeshBasicMaterial({map:new T.CanvasTexture(cv2)}));pq.position.set(0,.85,-.13);pq.rotation.y=Math.PI;sg.add(pq);
+  addObst(G.x,sz2,.7);
+  var mg2=new T.Group();mg2.position.set(G.x,0,G.z);scene.add(mg2);
+  box(1.2,.2,2.4,0x5a4a35,0,.1,0,mg2);
+  var dead=new T.Group();mg2.add(dead);
+  for(i=0;i<7;i++){var sk=box(.04,.5,.04,0x6b5a3a,(i%4-1.5)*.28,.3,(Math.floor(i/4)-.5)*.8,dead);sk.rotation.z=(i%3-1)*.5}
+  var bloom=new T.Group();mg2.add(bloom);bloom.visible=false;
+  [0xd9362f,0xf28ab0,0xf2c14e,0xb79bf0,0xffffff,0xff8c5a].forEach(function(c,k){
+    for(var q2=0;q2<3;q2++){var fl=new T.Mesh(new T.IcosahedronGeometry(.12,0),M(c));fl.position.set(Math.cos(k*1.1+q2)*.5,.3,Math.sin(k*1.7+q2)*1.0);bloom.add(fl);box(.03,.2,.03,0x4a8a3a,fl.position.x,.2,fl.position.z,bloom)}
+  });
+  var bq=new T.Group();bq.position.set(0,.22,0);mg2.add(bq);bq.visible=false;
+  for(i=0;i<7;i++){var lf=new T.Mesh(new T.IcosahedronGeometry(.13,0),M(i%3?0xf6f6ee:0xf2c14e));lf.position.set(Math.cos(i*.9)*.2,.12+(i%2)*.08,Math.sin(i*.9)*.2);bq.add(lf)}
+  box(.04,.2,.4,0x4a8a3a,0,.04,.1,bq);box(.34,.06,.06,0xd9536f,0,.02,.28,bq);
+  var beam=beamMesh();beam.visible=false;mg2.add(beam);
+  GV={bq:bq,dead:dead,bloom:bloom,beam:beam};
+  /* the lonely house */
+  var HR=house({x:-72,z:158,ry:Math.PI,w:5.6,d:4.8,h:3.0,wall:0x7c776c,roof:0x3c3630,roofH:2.0,chimney:true,id:'edmund',name:"Edmund's house"});
+  var hg=HR.g,hw=5.6,hd=4.8,hh=3.0;
+  function hob(lx,lz,r){addObst(-72+lx*Math.cos(Math.PI)+lz*Math.sin(Math.PI),158-lx*Math.sin(Math.PI)+lz*Math.cos(Math.PI),r)}
+  [-1,1].forEach(function(s){
+    var b1=box(1.3,.12,.08,0x4a3a2a,s*hw*.3,hh*.62+.15,hd/2+.14,hg);b1.rotation.z=.28*s;
+    var b2=box(1.3,.12,.08,0x3a2e22,s*hw*.3,hh*.62-.15,hd/2+.14,hg);b2.rotation.z=-.22*s;
+  });
+  var rh2=box(1.1,.12,.9,0x1d1d22,.7,hh+.9,.4,hg);rh2.rotation.z=-.5;
+  [[.2,hh+1.2,.2],[1.2,hh+.8,.6]].forEach(function(r){var rf=box(.1,1.0,.1,0x3a2a1e,r[0],r[1],r[2],hg);rf.rotation.z=.4});
+  for(i=0;i<5;i++){var vn=box(.08,1.4+(i%2)*.8,.08,0x3f5a30,-hw/2+.2+i*.6,.9,hd/2+.1,hg);vn.rotation.z=(i%3-1)*.1}
+  [-6,-4,-2.4,2.4,4,5.5].forEach(function(px,k){
+    var pst=box(.14,.6+(k%3)*.35,.14,0x5a4a3a,px*.8,.35,hd/2+4.5,hg);pst.rotation.z=(k%2?.2:-.15);hob(px*.8,hd/2+4.5,.3);
+  });
+  var rr3=box(2.6,.1,.1,0x5a4a3a,-4.2,.55,hd/2+4.5,hg);rr3.rotation.z=.1;
+  var tdx=4.2,tdz=1.0;
+  var dtg=new T.Group();dtg.position.set(tdx,0,tdz);hg.add(dtg);
+  var dtr=shadow(new T.Mesh(new T.CylinderGeometry(.18,.34,3.6,5),M(0x4a3a2a)));dtr.position.y=1.8;dtg.add(dtr);
+  [[.9,2.6],[-.8,3.0],[.3,3.3]].forEach(function(b,k){var br=box(.09,1.4,.09,0x4a3a2a,b[0]*.6,b[1],0,dtg);br.rotation.z=b[0]>0?-.9:.9});
+  hob(tdx,tdz,.6);
+  var gl3=new T.Mesh(new T.SphereGeometry(.12,8,6),new T.MeshStandardMaterial({color:0x9ad8ff,emissive:0x6ab8ff,emissiveIntensity:1.2}));gl3.position.set(1.3,1.6,hd/2+.25);hg.add(gl3);
+  /* the ghost lives in the room built from this door */
+  var dd=DOORS[DOORS.length-1],slot=DOORS.length-1,ox=1000+slot*40,ID2=clamp(hd*1.25+1.5,7,12);
+  NPC_DEFS.push({id:'edmund',name:'Edmund',coat:0xdfe6f5,hat:'none',hair:0xcccccc,beard:0xcccccc,pants:0xdfe6f5,skin:0xe8eefa,ghost:true,
+    x:ox,z:-ID2/2+2.0,homeYaw:0,mx:dd.x,mz:dd.z+.5});
+}catch(e){}})();
 
 /* creek water, banks and bridges */
 (function(){try{
@@ -1048,7 +1305,7 @@ function updatePreviews(dt){
 
 var npcs=[];
 NPC_DEFS.forEach(function(d){
-  var m=makePerson(d);if(d.scale)m.scale.setScalar(d.scale);m.position.set(d.x,0,d.z);m.rotation.y=d.homeYaw;scene.add(m);
+  var m=makePerson(d);if(d.scale)m.scale.setScalar(d.scale);if(d.ghost)ghostify(m,d);m.position.set(d.x,0,d.z);m.rotation.y=d.homeYaw;scene.add(m);
   d.mesh=m;d.yaw=d.homeYaw;d.wave=false;addObst(d.x,d.z,.6);
   d.tag=document.createElement('div');d.tag.className='tag';
   d.tag.innerHTML='<div class="mark">!</div><div class="nm"></div>';d.tag.lastChild.textContent=d.name;
@@ -1386,7 +1643,7 @@ var inv={herb:0,mint:0,plank:0,pebble:0,frog:0,kite:0,wool:0,berry:0,tonic:0,nai
 var INV_NAMES={herb:'Herbs',mint:'Mint',plank:'Planks',pebble:'Smooth stones',frog:'Frogs',kite:'Kite',wool:'Wool',berry:'Berries',tonic:'Tonic',nails:'Nails',note:'Note for Mira',banner:'Banner',apple:'Apples',hen:'Hens',ore:'Glow ore',rod:'Fishing rod',letter:'Letter for Garo',lantern:'Lanterns',mushroom:'Mushrooms',egg:'Eggs',lamb:'Lambs',wood:'Firewood',scrap:'Scrap iron',fish:'Fish',flower:'Moonflowers',invite:'Invitation',pie:'Apple pie',shoes:'Horseshoes'};
 var SINGLE={letter:1,rod:1,invite:1,pie:1,shoes:1,kite:1,tonic:1,nails:1,note:1,banner:1};
 var coins=0,finale=false,started=false,ended=false,time=0,playTime=0,dusk=0,fireUntil=0,fireNext=0,endShown=false;
-var NPC_IDS=['wren','mira','tom','garo','lena','fern','bram','pip','tilda','hazel','ivo','rowan','odette','linus','horace','moss','willa','finn','juniper','sahar','marin'],TOTAL=130,QS={};
+var NPC_IDS=['wren','mira','tom','garo','lena','fern','bram','pip','tilda','hazel','ivo','rowan','odette','linus','horace','moss','willa','finn','juniper','sahar','marin','alden','hank','nell','posy','pruitt','dot','barnaby','ruth','edmund'],TOTAL=152,QS={};
 NPC_IDS.forEach(function(id){QS[id]={i:0,s:'new',delivered:false,chat:0}});
 var QUEST={
   wren:[
@@ -1860,6 +2117,67 @@ QCR('Marin','Message in a Bottle',45,'bottle',1,'B',"Find the green bottle somew
 QD('Marin','Fresh Crab for Mira',50,'crab','mira','Carry the crab to Mira at the bakery, west of the square.',"I caught a big crab this morning, and Mira makes the best chowder. Take it to her, west of the square, a long walk from the beach. Keep it in the pot.","The lid is tight. Don't peek.","The crab is for Mira, in the house west of the square.","A crab! Fresh from the sea. I'll make chowder.","Hand over the crab","Crab delivered","Tell Marin the chowder is hers whenever she visits.","Chowder tonight! Wonderful.","A long walk with a crab. You're a good friend.")];
 CHAT.marin=["The tide is my clock.","Come back at sunset. The whole sea goes gold."];
 FINALE.marin="Lanterns on the sand. The sea is glowing.";
+/* ---- Westhaven: eight new villagers ---- */
+REG.W=[-200,18,'the fields around Westhaven',44];
+REG.R=[-110,5,'the west road',30];
+REG.H=[-216,-36,'the hollow north of Westhaven',22];
+var NEW6={wcandle:['Candles',['stick',0xf6f0d8,0xffd36a]],hymnal:['Hymnals',['songbook',0x2f4a8a,0xf4efe0]],wnail:['Nails',['stick',0x8a8a96,0x5a5a66]],lumber:['Lumber',['stick',0xc9a46a,0x9a7a4a]],sage:['Sage',['blossom',0x6a9a5a,0xa8c898]],bandage:['Bandage rolls',['spool',0xf4f4f4,0xd23a3a]],rose:['Roses',['blossom',0xd9362f,0x4a8a3a]],sunflower:['Sunflowers',['blossom',0xf2c14e,0x4a8a3a]],woil:['Lamp oil',['ink',0xd9a93a,0x5a3a24]],marble:['Marbles',['gem',0x9a7ad9,0xffffff]],weggs:['Fresh eggs',['pumpkin',0xf6efe0,0xd9c9a0]]};
+Object.keys(NEW6).forEach(function(k){inv[k]=0;INV_NAMES[k]=NEW6[k][0];GEN[k]=NEW6[k][1];ITEM_MK[k]=function(){return mkGen(GEN[k])}});
+var NEW_DEL6={blessing:'Blessing scroll',plowshare:'Plough blade',wtonic:'Healing tonic',bouquet:'Bouquet',relic:'Clay relic',bracelet:'Bracelet',seamap:'Sea map',wpie:'Apple pie'};
+Object.keys(NEW_DEL6).forEach(function(k){inv[k]=0;INV_NAMES[k]=NEW_DEL6[k];SINGLE[k]=1});
+QUEST.alden=[
+QCR('Father Alden','Candles for Evening Prayer',45,'wcandle',6,'R',"Gather candles that fell along {r}.","Peace be with you, traveler. I'm Father Alden. The candle crate slipped off the cart and the candles rolled all along {r}. Six of them, if you would.","Follow the beams along {r}. Mind the cart ruts.","Six candles along {r}.","Whole, and not one snapped. A small miracle.","Evening prayer will glow tonight. Bless you."),
+QCR('Father Alden','The Missing Hymnals',45,'hymnal',4,'W',"Find the hymnals scattered across {r}.","After the harvest picnic, four hymnals went missing from the pews. The children carried them off to {r}, I suspect. Could you gather them?","Follow the beams across {r}.","Four hymnals in {r}.","Dog-eared, but all there. Thank you.","Sunday's singing is saved."),
+QD('Father Alden','A Blessing for Elder Wren',60,'blessing','wren','Carry the blessing to Elder Wren at the hall, north of the village square.',"I've written a blessing for the village fair. It should go to Elder Wren, at the hall north of the village square. It's a long walk east along the road.","Take the west road east to the village. The hall is north of the square.","The blessing is for Elder Wren, in the hall north of the village square.","A blessing from Westhaven? How kind of Father Alden.","Hand over the blessing","Blessing delivered","Tell Father Alden the fair will be better for it.","Good. I trust it arrived safely.","Thank you. May the road be kind to you.")];
+QUEST.hank=[
+QCR('Hank','Spilled Nails',40,'wnail',8,'W',"Collect the nails scattered across {r}.","Howdy! Hank's the name, hardware's the game. A keg of nails burst in the yard and they've scattered all over {r}. Eight of them would do nicely.","Follow the beams across {r}. Watch your boots.","Eight nails in {r}.","Straight and sharp. Good as new.","Not a nail wasted. Thanks!"),
+QCR('Hank','Lumber from the Road',50,'lumber',5,'R',"Find the lumber that fell off the wagon along {r}.","The lumber wagon lost half its load along {r}. Five good planks are lying out there. I could use them in the shop.","Follow the beams along {r}.","Five pieces of lumber along {r}.","Sturdy stuff. The wagon driver owes you a drink.","The porch will get its boards after all."),
+QD('Hank','A Plough Blade for Farmer Tom',60,'plowshare','tom',"Carry the new plough blade to Farmer Tom, at the farm northeast of the village square.","Tom's old plough snapped its blade last week, so I forged him a new one. His farm is northeast of the village square, a long walk east along the road. It's heavy.","Follow the west road east, then north of the square to the farm.","The blade is for Farmer Tom, at the farm northeast of the square.","A new blade! Hank is the best.","Hand over the blade","Blade delivered","Tell Hank I'll pay him in turnips.","Good. That blade will outlast the plough.","Turnips! He does have good taste.")];
+QUEST.nell=[
+QCR('Dr. Nell','Healing Sage',45,'sage',5,'W',"Pick sage leaves growing across {r}.","Hello, I'm Dr. Nell. Sage makes the best poultice, and it grows wild across {r}. Five bunches would stock the cabinet.","Follow the beams across {r}. The leaves are grey-green.","Five bunches of sage in {r}.","Fresh and fragrant. Wonderful.","The clinic is stocked again. Thank you."),
+QCR('Dr. Nell','Bandage Rolls',50,'bandage',5,'H',"Find the bandage rolls that spilled in {r}.","The supply cart tipped over in {r} and my bandages rolled everywhere. I need five rolls before someone trips and needs them.","Follow the beams into {r}.","Five bandage rolls in {r}.","Clean and dry. You've saved me a trip.","Now I'm ready for anything."),
+QD('Dr. Nell','Tonic for Tilda',55,'wtonic','tilda',"Carry the tonic to Tilda the weaver, northwest of the village square.","Tilda's joints ache every winter. I've mixed a tonic for her. She lives northwest of the village square, along the road east. Would you take it?","Keep it upright. Tilda is northwest of the square.","The tonic is for Tilda, in the house northwest of the village square.","Dr. Nell's tonic! My knees will thank her.","Hand over the tonic","Tonic delivered","Tell Dr. Nell I'll take it three times a day.","Good. A tonic delivered is half the cure.","Excellent. Tilda is in good hands.")];
+QUEST.posy=[
+QCR('Posy','Wild Roses',45,'rose',6,'R',"Pick wild roses blooming along {r}.","Welcome to my shop! I'm Posy. Wild roses bloom along {r}, and the shop is nearly out. Could you pick six?","Follow the beams along {r}. Mind the thorns.","Six wild roses along {r}.","What a perfect red! Thank you.","The shop smells wonderful again."),
+QCR('Posy','Sunflowers',40,'sunflower',4,'W',"Pick sunflowers growing across {r}.","Sunflowers are the happiest flower in the world. A few have bloomed across {r}. Four, please.","Follow the beams across {r}.","Four sunflowers in {r}.","Look how they glow!","The window display will be golden."),
+QD('Posy','A Bouquet for Mira',55,'bouquet','mira',"Carry the bouquet to Mira at the bakery, west of the village square.","It's Mira's birthday, and I made her a bouquet. She runs the bakery, west of the village square, a long walk east along the road. Please keep it fresh.","Hold it gently. The bakery is west of the village square.","The bouquet is for Mira, at the bakery west of the village square.","For me? It's beautiful. Who sent this?","Hand over the bouquet","Bouquet delivered","Tell Posy I'll bring her a cake.","Good. Flowers should never wait.","She loved them! Cake for everyone.")];
+QUEST.pruitt=[
+QCR('Mayor Pruitt','Oil for the Road Lamps',45,'woil',4,'R',"Find the lamp oil flasks left along {r}.","I'm Mayor Pruitt. The lamps along the west road need oil, and the flasks were left somewhere along {r}. Four of them, if you please.","Follow the beams along {r}.","Four lamp oil flasks along {r}.","Splendid. The road will glow all night.","A well-lit road is a well-run town."),
+QD('Mayor Pruitt','A Relic for the Museum',65,'relic','odette',"Carry the clay relic to Odette at the museum, east of the village square.","Our farmers dug up this clay relic years ago. I'd like to loan it to the village museum. Odette runs it, east of the village square, a long walk along the road.","Don't drop it. The museum is east of the village square.","The relic is for Odette, at the museum east of the village square.","A relic from Westhaven? Wonderful!","Hand over the relic","Relic delivered","Tell the Mayor the museum will take good care of it.","Good. Culture belongs to everyone.","Thank you. Westhaven will be on the map.")];
+QUEST.dot=[
+QCR('Dot','Lost Marbles',40,'marble',6,'W',"Find the marbles scattered across {r}.","Hi! I'm Dot. I dropped my bag of marbles and they rolled all over {r}. Six of them are purple and shiny.","Follow the beams across {r}.","Six marbles in {r}.","Purple! You found them all!","I'm going to win every game now."),
+QD('Dot','A Bracelet for Pip',50,'bracelet','pip',"Carry the bracelet to Pip, in the small house east of the village square.","I made a friendship bracelet for my pen pal Pip. He lives in the small house just east of the village square. Can you take it?","Walk carefully. It's made of tiny beads.","The bracelet is for Pip, in the small house east of the village square.","A bracelet? From Dot? Cool!","Hand over the bracelet","Bracelet delivered","Tell Dot I'm wearing it already.","Good. Friends always write back.","Pip is wearing it! That's the best.")];
+QUEST.barnaby=[
+QCR('Barnaby','Rope for the Rigging',45,'rope',3,'R',"Find coils of rope along {r}.","Ahoy, landlubber. I'm Barnaby, retired sailor. I'm building a ship in a bottle and need rope for the rigging. Some coils were dropped along {r}. Three of them.","Follow the beams along {r}.","Three coils of rope along {r}.","Strong hemp. She'll sail true.","Fair winds to you, friend."),
+QD('Barnaby','A Sea Map for Marin',60,'seamap','marin',"Carry the sea map to Marin at the beach cottage on the east coast.","Marin keeps the boats on the east coast, and I drew her a map of the best fishing waters. It's a very long walk, all the way east across the village to the beach.","Follow the road east, past the village, to the sea.","The sea map is for Marin, at the beach cottage on the east coast.","A map! Barnaby's fishing spots? I'll be careful with this.","Hand over the map","Map delivered","Tell Barnaby I'll catch him a big one.","Good. The old sea dog will be pleased.","Marin will be at the sea every dawn.")];
+QUEST.ruth=[
+QCR('Ruth','Fresh Eggs',40,'weggs',6,'W',"Gather fresh eggs from {r}.","I'm Ruth. My hens lay wherever they please, mostly in the tall grass across {r}. Six fresh eggs would make a good start on the day.","Follow the beams across {r}.","Six eggs in {r}.","Still warm. Perfect.","Breakfast is saved!"),
+QD('Ruth','Pie for Garo',55,'wpie','garo',"Carry the apple pie to Garo at the forge, east of the village square.","I baked an apple pie for Garo the blacksmith. We trade pies for horseshoes. The forge is east of the village square, a long walk down the west road.","Keep it level. The forge is east of the square.","The pie is for Garo, at the forge east of the village square.","Ruth's apple pie! My favorite.","Hand over the pie","Pie delivered","Tell Ruth the horseshoes are ready.","Good. A warm pie makes the walk worthwhile.","Garo is a lucky man.")];
+CHAT.alden=["The road is long, but the Lord walks it with you.","Come in and rest whenever you like."];
+CHAT.hank=["If it can be fixed, I've got a part for it.","Measure twice, cut once."];
+CHAT.nell=["Drink water and rest. That's most of medicine.","Wash your hands. It's still the best advice."];
+CHAT.posy=["Flowers say what words can't.","Every bloom is a small miracle."];
+CHAT.pruitt=["Westhaven has a fine future, mark my words.","A town is only as good as its road."];
+CHAT.dot=["Do you want to play tag? I'm very fast.","I found a frog. His name is Gerald."];
+CHAT.barnaby=["The sea doesn't care about your plans.","A good knot never lets go."];
+CHAT.ruth=["Eggs, pies, and good gossip. That's my trade.","The hens never read the schedule."];
+FINALE.alden="The lanterns look like prayers floating up.";
+FINALE.hank="Not a tool needed tonight. Just lights.";
+FINALE.nell="No patients tonight. Everyone's smiling.";
+FINALE.posy="I brought flowers for every lantern.";
+FINALE.pruitt="A fine fair. A fine town. A fine road.";
+FINALE.dot="Lanterns! Can I hold one?";
+FINALE.barnaby="Lanterns on the water would be better. Still, lovely.";
+FINALE.ruth="I baked three pies for the fair. Don't tell Garo.";
+/* ---- Edmund the ghost ---- */
+REG.G=[-72,124,'the meadows around the cemetery',36];
+inv.gflower=0;INV_NAMES.gflower='White lilies';GEN.gflower=['blossom',0xf6f6ee,0x4aa05a];ITEM_MK.gflower=function(){return mkGen(GEN.gflower)};
+inv.gbouquet=0;INV_NAMES.gbouquet='Bouquet for the grave';SINGLE.gbouquet=1;
+QUEST.edmund=[
+QCR('Edmund','White Lilies',50,'gflower',5,'G',"Pick white lilies in {r}.","Oh... a visitor. No one has come in so long. I am Edmund. This was my house, and my grave is in the cemetery north of here. No one has ever brought flowers. Could you pick five white lilies from {r}? I used to grow them.","Follow the beams across {r}. Thank you, kind soul.","Five white lilies in {r}.","I can't hold them, not anymore. But I can smell them. They smell like my garden. Take this ribbon and make them into a bouquet.","Come back when you are ready. I'll wait. I'm good at waiting."),
+QD('Edmund','Flowers for the Grave',90,'gbouquet','__grave',"Lay the bouquet on Edmund's grave in the cemetery, north of his house.","Please, lay the bouquet on my grave. It's the stone under the dead tree, in the cemetery just north of this house. I've never had anyone remember me.","The grave is in the cemetery north of here. Walk to the headstone and lay the flowers down.","Lay the bouquet on Edmund's grave in the cemetery, north of his house.","Edmund's grave.","Lay flowers","Flowers laid","The grave is quiet now.","You did it. I felt it from here. The cold is leaving me for the first time in sixty years.","I'm free, my friend. Thank you. Go and have a happy life, and visit me sometimes.")];
+CHAT.edmund=["It's so warm now. I'd forgotten warm.","Sometimes I hear laughter from the village. It's lovely.","You can visit my grave anytime. It has flowers now."];
+FINALE.edmund="I can see the lanterns from my window. I'm so happy.";
 function qDone(id){return QS[id].i>=QUEST[id].length}
 function curQ(id){return QUEST[id][QS[id].i]}
 function qProg(id){var q=curQ(id);return q.kind==='deliver'?[QS[id].delivered?1:0,1]:[Math.min(inv[q.item],q.n),q.n]}
@@ -1901,6 +2219,7 @@ function refresh(){
   if(dc){var dp=document.createElement('p');dp.className='donelist';dp.textContent='Finished '+dc+' of '+TOTAL+' requests.';ql_el.appendChild(dp)}
   if(BRIDGES.some(function(b){return b.broken&&!b.fixed}))active.board=1;
   items.forEach(function(it){it.beam.visible=!it.got&&!!active[it.type]});
+  graveSync();
   npcs.forEach(function(n){
     var st=qStatus(n.id);
     n.markEl.className='mark '+(st==='new'?'':st);n.markEl.textContent=MARK[st];
@@ -2027,6 +2346,7 @@ function action(){
   else if(nearChest)openChest();
   else if(inRoom&&nearExit)exitRoom();
   else if(nearDoor&&!inRoom)enterRoom(nearDoor);
+  else if(nearGrave)layBouquet();
   else if(nearDig)doDig(nearDig);
   else if(nearBridge)repairBridge(nearBridge);
 }
@@ -2082,7 +2402,7 @@ function applySave(s){
 }
 function describeSave(s){
   var d=0;if(s.qs)for(var k in s.qs){var q=s.qs[k];if(q)d+=q.i!=null?(q.i|0):(q.s==='done'?1:0)}
-  return d+'/130 helped · '+(s.coins|0)+' coins · '+Math.floor((+s.t||0)/60)+' min';
+  return d+'/152 helped · '+(s.coins|0)+' coins · '+Math.floor((+s.t||0)/60)+' min';
 }
 var btnNew=$('btnNew'),btnCont=$('btnCont'),menuNote=$('menuNote');
 (function(){
@@ -2130,7 +2450,7 @@ window.addEventListener('pagehide',writeSave);
 document.addEventListener('visibilitychange',function(){if(document.hidden)writeSave()});
 
 /* ---------- house interiors ---------- */
-var trans=false,doorCool=0,nearDoor=null,nearChest=false,nearExit=false,snapCam=false,nearDig=null,nearBridge=null;
+var trans=false,doorCool=0,nearDoor=null,nearChest=false,nearExit=false,snapCam=false,nearDig=null,nearBridge=null,nearGrave=false;
 var fadeEl=document.createElement('div');
 fadeEl.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;background:#000;opacity:0;pointer-events:none;transition:opacity .26s ease;z-index:30';
 document.body.appendChild(fadeEl);
@@ -2218,6 +2538,24 @@ function buildRoom(d){
   else if(id==='lena'||id==='ivo'){B(.9,.9,.9,0x7a5636,-IW/2+.8,.45,ID/2-1.1);O(-IW/2+.8,ID/2-1.1,.6);[0,1,2].forEach(function(i){B(.05,1.6,.05,0x8a6a48,-IW/2+.1,1.4,-1+i*.6)})}
   else if(id==='bram'){B(2.6,.9,.9,0x8a6a48,-IW/2+1.5,.45,ID/2-1.2);OR(-IW/2+1.5,ID/2-1.2,2.6,.9);[0,1,2].forEach(function(i){B(1.6,.12,.3,0xc9a46a,-IW/2+.9,.1+i*.12,ID/2-2.4)})}
   else if(id==='tilda'||id==='fern'||id==='rowan'){B(.1,1.8,1.6,0x8a6a48,-IW/2+.9,.9,ID/2-1.6);B(1.6,.1,.1,0x8a6a48,-IW/2+.9,1.7,ID/2-1.6);B(.06,1.3,1.3,[0x8a5aa8,0x4f8a5a,0xb0443a][slot%3],-IW/2+.9,.9,ID/2-1.6);OR(-IW/2+.9,ID/2-1.6,.5,1.6)}
+
+  else if(id==='pruitt'){B(2.4,.9,1.0,0x6b4a2f,-IW/2+1.6,.45,ID/2-1.4);B(2.5,.08,1.1,0x8a6a48,-IW/2+1.6,.94,ID/2-1.4);OR(-IW/2+1.6,ID/2-1.4,2.4,1.0);B(1.4,1.0,.05,0xe9dcc2,-IW/4,2.2,-ID/2+.05);B(1.2,.8,.04,0x7a9a6a,-IW/4,2.2,-ID/2+.08);B(.05,.9,1.2,0xb0443a,IW/2-.05,2.2,0)}
+  else if(id==='dot'){B(.4,.4,.4,0xd9362f,-IW/2+.8,.2,ID/2-1.2);B(.4,.4,.4,0x4f7ab0,-IW/2+1.3,.2,ID/2-1.2);B(.4,.4,.4,0xf2c14e,-IW/2+1.05,.6,ID/2-1.2);OR(-IW/2+1.05,ID/2-1.2,1.0,.5);var ts=new T.Mesh(new T.SphereGeometry(.28,8,6),M(0xb08a5a));ts.position.set(-IW/2+.9,.5,ID/2-2.2);g.add(ts);var tb=new T.Mesh(new T.SphereGeometry(.18,8,6),M(0xb08a5a));tb.position.set(-IW/2+.9,.95,ID/2-2.2);g.add(tb)}
+  else if(id==='barnaby'){cyl(.5,.5,.06,0x6b4a2f,-IW/2+.1,2.2,-1.5,g,12).rotation.z=Math.PI/2;B(.06,1.2,.1,0x6b4a2f,-IW/2+.1,2.2,-1.5);B(.06,.1,1.2,0x6b4a2f,-IW/2+.1,2.2,-1.5);B(.8,.7,.8,0x8a6a48,-IW/2+1.0,.35,ID/2-1.4);B(.6,.15,.25,0x8a4a3a,-IW/2+1.0,.78,ID/2-1.4);B(.05,.5,.05,0x5f4630,-IW/2+1.0,1.1,ID/2-1.4);B(.04,.4,.3,0xf6f1e4,-IW/2+1.0,1.1,ID/2-1.4);O(-IW/2+1.0,ID/2-1.4,.55);[0,1].forEach(function(i){B(.05,1.8,.05,0x8a6a48,-IW/2+.1,1.4,1.2+i*.5)})}
+  else if(id==='ruth'){B(2.6,.9,.8,0x8a6a48,-IW/2+1.5,.45,ID/2-1.2);B(2.7,.08,.9,0xe9dcc2,-IW/2+1.5,.94,ID/2-1.2);OR(-IW/2+1.5,ID/2-1.2,2.6,.8);[0,1,2].forEach(function(i){cyl(.28,.24,.2,0x9a7248,-IW/2+.8+i*.7,1.08,ID/2-1.2,g,8);for(var e=0;e<3;e++){var eg=new T.Mesh(new T.SphereGeometry(.07,6,5),M(0xf6efe0));eg.position.set(-IW/2+.8+i*.7+(e-1)*.1,1.22,ID/2-1.2);g.add(eg)}})}
+
+  else if(id==='edmund'){
+    var cob=new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false});
+    PL(1.1,1.1,-IW/2+.6,RH-.6,-ID/2+.03,0,0,cob);PL(1.1,1.1,IW/2-.6,RH-.6,-ID/2+.03,0,0,cob);PL(1.1,1.1,-IW/2+.03,RH-.6,ID/2-.6,0,Math.PI/2,cob);PL(.9,.9,IW/2-.03,RH-.5,ID/2-.6,0,Math.PI/2,cob);
+    var rk=new T.Group();rk.position.set(-2.6,0,1.0);g.add(rk);
+    box(.7,.08,.7,0x5a4a3a,0,.5,0,rk);box(.7,.8,.08,0x5a4a3a,0,.95,-.32,rk);box(.08,.08,.9,0x5a4a3a,-.3,.12,0,rk);box(.08,.08,.9,0x5a4a3a,.3,.12,0,rk);
+    O(-2.6,1.0,.5);
+    R.tick=function(t){rk.rotation.z=Math.sin(t*1.2)*.12};
+    B(.8,1.0,.06,0x5a3a24,-IW*.12,2.0,-ID/2+.06);B(.65,.85,.05,0x3a3a46,-IW*.12,2.0,-ID/2+.09);
+    var pf=new T.Mesh(new T.SphereGeometry(.17,8,6),M(0xd9c9b0));pf.position.set(-IW*.12,2.1,-ID/2+.12);pf.scale.z=.3;g.add(pf);
+    B(.5,.05,.5,0x4a3a2a,2.2,.03,.5);B(.15,.5,.15,0x3a2e22,3.2,.25,1.8);
+    var cdl=new T.Mesh(new T.SphereGeometry(.07,6,5),new T.MeshStandardMaterial({color:0x9ad8ff,emissive:0x6ab8ff,emissiveIntensity:1.2}));cdl.position.set(IW*.2,1.2,ID*.02);g.add(cdl);
+  }
   else if(!d.kind){if(slot%2){shelf(-IW/2+.3,0,2.2)}else{B(2.2,.8,.7,0x8a6a48,-IW/2+1.3,.4,ID/2-1.2);OR(-IW/2+1.3,ID/2-1.2,2.2,.7)}}
   if(d.kind==='museum'){
     var ex=['vase','fossil','gem','coin','bell','shell','comb','cog'];
@@ -2274,6 +2612,87 @@ function buildRoom(d){
     B(1.6,.8,.8,0x6b4a2f,-IW/2+1.2,.4,ID/2-1.4);OR(-IW/2+1.2,ID/2-1.4,1.6,.8);B(.5,.2,.3,0x6d7378,-IW/2+1.0,.9,ID/2-1.4);
     B(1.4,.04,.9,0x8a4a3a,0,.02,ID/2-2.6);
   }
+
+  if(d.kind==='church'){
+    var pw=0x7a5636,az=-ID/2;
+    B(2.0,.03,ID-2.4,0x9a2f3a,0,.02,.6);
+    B(IW-3.5,.28,2.6,0x8a8272,0,.14,az+1.5);
+    B(2.4,1.0,.8,0xe9e2d0,0,.78,az+1.2);B(2.6,.08,.9,0xd9a93a,0,1.32,az+1.2);OR(0,az+1.2,2.4,.8);
+    [-.9,.9].forEach(function(cx){B(.12,.4,.12,0xf6f0d8,cx,1.56,az+1.2);B(.06,.1,.06,0xffd36a,cx,1.82,az+1.2)});
+    B(.22,2.2,.12,0xd9a93a,0,3.0,az+.1);B(1.1,.22,.12,0xd9a93a,0,3.35,az+.1);
+    B(.9,1.2,.8,pw,-IW/2+2.0,.73,az+1.6);B(1.0,.08,.9,0x5a3a24,-IW/2+2.0,1.36,az+1.6);O(-IW/2+2.0,az+1.6,.6);
+    B(2.2,1.8,.6,0x6b4a2f,IW/2-1.8,1.18,az+.5);OR(IW/2-1.8,az+.5,2.2,.6);
+    for(var op=0;op<6;op++)cyl(.12,.12,1.2+(op%3)*.4,0xd9d2c0,IW/2-2.6+op*.4,2.6+(op%3)*.2,az+.45,g,8);
+    [-1,1].forEach(function(sd){for(var rw=0;rw<4;rw++){
+      var px=sd*2.9,pz=-1.8+rw*1.6;
+      B(2.8,.1,.75,pw,px,.5,pz);B(2.8,.75,.1,pw,px,.9,pz-.38);B(.1,.5,.7,pw,px-1.3,.25,pz);B(.1,.5,.7,pw,px+1.3,.25,pz);OR(px,pz,2.8,.75);
+    }});
+    var gcol=[0x4f7ab0,0xd9362f,0x5f9a4a,0xd9a93a];
+    [-1,1].forEach(function(sd){[-4.5,0,4.5].forEach(function(gz,gi){
+      var gx=sd*(IW/2-.05);B(.05,2.4,1.0,0x5a3a24,gx,2.2,gz);
+      for(var sg=0;sg<3;sg++){
+        var pm=new T.Mesh(new T.PlaneGeometry(.8,.7),new T.MeshBasicMaterial({color:gcol[(sg+gi+(sd>0?1:0))%4],transparent:true,opacity:.88}));
+        pm.position.set(gx-sd*.04,1.65+sg*.72,gz);pm.rotation.y=sd<0?Math.PI/2:-Math.PI/2;g.add(pm);
+      }
+    })});
+    B(.5,1.0,.5,pw,-IW/2+1.0,.5,ID/2-1.0);O(-IW/2+1.0,ID/2-1.0,.45);
+  }
+  if(d.kind==='hardware'){
+    var wd=0x7a5636,pc=[0xd9362f,0x4f7ab0,0xf2c14e,0x5f8a4a,0xe9e2d0];
+    for(var hs=0;hs<4;hs++){
+      var sx=-IW/2+1.8+hs*2.6;B(2.2,2.2,.45,wd,sx,1.1,-ID/2+.3);
+      for(var lv=0;lv<4;lv++){B(2.0,.06,.4,0x5a3a24,sx,.4+lv*.55,-ID/2+.34);for(var j=0;j<4;j++)B(.4,.32,.3,pc[(j+lv+hs)%5],sx-.7+j*.46,.58+lv*.55,-ID/2+.42)}
+      OR(sx,-ID/2+.3,2.2,.45);
+    }
+    B(.1,1.6,3.6,0xc9a46a,-IW/2+.08,1.9,.5);
+    for(var tl=0;tl<6;tl++){B(.06,.5,.12,0x6d7378,-IW/2+.18,1.9,-1+tl*.6);B(.06,.05,.4,0x8a5a2a,-IW/2+.18,1.55,-1+tl*.6)}
+    B(3.6,1.0,.9,wd,-2.4,.5,-.3);B(3.8,.08,1.0,0xc9a46a,-2.4,1.04,-.3);B(.5,.4,.4,0x3a3a40,-3.3,1.28,-.3);B(.3,.3,.3,0xf2c14e,-1.6,1.24,-.3);OR(-2.4,-.3,3.6,.9);
+    [-2.5,-1.4,-.3].forEach(function(bz){cyl(.4,.4,.8,0x6b4a2f,IW/2-.7,.4,bz,g,8);O(IW/2-.7,bz,.45)});
+    for(var ls=0;ls<5;ls++)B(2.6,.18,.4,ls%2?0xc9a46a:0xb08a5a,-IW/2+1.6,.12+ls*.18,ID/2-1.1);
+    OR(-IW/2+1.6,ID/2-1.1,2.6,.4);
+    [-2,2.2].forEach(function(rx){var rp=new T.Mesh(new T.TorusGeometry(.3,.07,6,12),M(0xc9a46a));rp.position.set(rx,2.7,-1);rp.rotation.x=Math.PI/2;g.add(rp)});
+    B(2.0,.5,.05,0xe9dcc2,IW/4,2.9,-ID/2+.06);
+  }
+  if(d.kind==='clinic'){
+    B(IW*.4,.03,ID*.3,0xb9d3e6,0,.02,.8);
+    var bx2=-IW/2+1.3,bz2=-ID/2+1.9;
+    B(1.0,.5,2.2,0xc9ced6,bx2,.45,bz2);B(.9,.12,2.1,0xffffff,bx2,.76,bz2);B(.7,.14,.4,0xf4f4f4,bx2,.9,bz2-.8);OR(bx2,bz2,1.0,2.2);
+    B(.06,1.9,2.4,0xa8c8e0,bx2+.95,1.2,bz2);
+    B(2.0,.1,1.0,0x8a6a48,1.8,.95,-ID/2+1.2);[[-.9,-.4],[.9,-.4],[-.9,.4],[.9,.4]].forEach(function(l){B(.1,.9,.1,0x6b4a2f,1.8+l[0],.45,-ID/2+1.2+l[1])});OR(1.8,-ID/2+1.2,2.0,1.0);
+    B(.5,.08,.5,0x4a7aa8,1.8,.5,-ID/2+2.2);B(.5,.5,.08,0x4a7aa8,1.8,.78,-ID/2+2.45);
+    B(.3,.3,.3,0xd9362f,2.3,1.15,-ID/2+1.2);B(.5,.04,.4,0xf4f4f4,1.4,1.03,-ID/2+1.2);
+    B(.6,2.0,2.2,0xe9e9ee,IW/2-.5,1.0,-.3);OR(IW/2-.5,-.3,.6,2.2);
+    for(var cb=0;cb<8;cb++)cyl(.07,.07,.28,[0xd9362f,0x4f7ab0,0x5f8a4a,0xf2c14e][cb%4],IW/2-.78,.5+Math.floor(cb/4)*.9,-1.1+(cb%4)*.5,g,6);
+    B(.05,1.1,.8,0xffffff,-IW/2+.05,2.0,1.2);
+    for(var eb=0;eb<5;eb++)B(.06,.07,.6-eb*.1,0x1d1d1d,-IW/2+.09,2.35-eb*.18,1.2);
+    B(1.1,.3,.05,0xd23a3a,-1.5,2.3,-ID/2+.05);B(.3,1.1,.05,0xd23a3a,-1.5,2.3,-ID/2+.05);
+    B(.1,1.5,.1,0xece6d8,-IW/2+.9,.75,1.0);var sk=new T.Mesh(new T.SphereGeometry(.2,8,6),M(0xece6d8));sk.position.set(-IW/2+.9,1.7,1.0);g.add(sk);
+    for(var rb=0;rb<3;rb++){var rt=new T.Mesh(new T.TorusGeometry(.22-rb*.03,.025,5,10),M(0xece6d8));rt.position.set(-IW/2+.9,1.35-rb*.18,1.0);rt.rotation.x=Math.PI/2;g.add(rt)}
+    O(-IW/2+.9,1.0,.4);
+    [-3.2,-2.4,-1.6].forEach(function(wx){B(.5,.08,.5,0x4a7aa8,wx,.5,ID/2-1.0);B(.5,.5,.08,0x4a7aa8,wx,.78,ID/2-.75);O(wx,ID/2-1.0,.3)});
+    B(.6,.08,.6,0x6d7378,IW/2-1.0,.1,1.2);B(.08,1.2,.08,0x6d7378,IW/2-1.0,.7,1.2);O(IW/2-1.0,1.2,.35);
+  }
+  if(d.kind==='florist'){
+    var fcol=[0xd9362f,0xf28ab0,0xf2c14e,0xb79bf0,0xffffff,0xff8c5a],wd2=0x8a6a48;
+    function fpot(x,y,z,i){
+      cyl(.22,.16,.3,0xb5663f,x,y+.15,z,g,8);
+      for(var q=0;q<3;q++){B(.03,.4,.03,0x4a8a3a,x+(q-1)*.1,y+.5,z);var hd=new T.Mesh(new T.IcosahedronGeometry(.14,0),M(fcol[(i+q)%6]));hd.position.set(x+(q-1)*.1,y+.74,z);g.add(hd)}
+    }
+    B(IW*.5,.03,ID*.35,0x5f8a4a,0,.02,.8);B(IW*.5-.5,.035,ID*.35-.5,0xe9dcc2,0,.022,.8);
+    cyl(.9,.9,.1,wd2,0,.85,.2,g,12);cyl(.1,.1,.85,wd2,0,.42,.2,g,6);cyl(.2,.16,.35,0xc9ced6,0,1.1,.2,g,8);
+    for(var bq=0;bq<8;bq++){var bh=new T.Mesh(new T.IcosahedronGeometry(.17,0),M(fcol[bq%6]));bh.position.set(Math.cos(bq)*.25,1.45+(bq%3)*.1,.2+Math.sin(bq)*.25);g.add(bh)}
+    O(0,.2,1.0);
+    B(3.2,1.0,.8,wd2,1.6,.5,-ID/2+.8);B(3.4,.08,.9,0xe9dcc2,1.6,1.04,-ID/2+.8);B(.4,.3,.4,0xf2c14e,.8,1.2,-ID/2+.8);OR(1.6,-ID/2+.8,3.2,.8);
+    fpot(2.3,1.04,-ID/2+.8,0);fpot(1.4,1.04,-ID/2+.8,2);
+    for(var wb=0;wb<4;wb++){cyl(.28,.24,.5,0x7a8a96,-IW/2+.7,.25,-2.4+wb*1.1,g,8);O(-IW/2+.7,-2.4+wb*1.1,.32);for(var sb=0;sb<4;sb++){B(.03,.6,.03,0x4a8a3a,-IW/2+.58+sb*.08,.75,-2.4+wb*1.1);var sh=new T.Mesh(new T.IcosahedronGeometry(.13,0),M(fcol[(wb+sb)%6]));sh.position.set(-IW/2+.58+sb*.08,1.08,-2.4+wb*1.1);g.add(sh)}}
+    for(var sl=0;sl<2;sl++){B(.4,.06,3.0,wd2,IW/2-.4,.7+sl*.8,-.4);for(var sp2=0;sp2<5;sp2++)fpot(IW/2-.45,.72+sl*.8,-1.6+sp2*.6,sp2+sl)}
+    O(IW/2-.4,-.4,.35);O(IW/2-.4,-1.4,.35);O(IW/2-.4,.6,.35);
+    [[-2,.5],[2,.4]].forEach(function(hp,i){
+      cyl(.02,.02,.9,0x3a3a40,hp[0],RH-.45,hp[1],g,4);cyl(.25,.2,.25,0x8a5a3a,hp[0],RH-1.05,hp[1],g,8);
+      for(var lf=0;lf<6;lf++){var l=new T.Mesh(new T.IcosahedronGeometry(.16,0),M(lf%2?0x4f9a45:fcol[(lf+i)%6]));l.position.set(hp[0]+Math.cos(lf)*.28,RH-1.2-(lf%3)*.1,hp[1]+Math.sin(lf)*.28);g.add(l)}
+    });
+    B(.4,.3,.3,0x4f7a9a,-1.8,.15,ID/2-1.2);B(.25,.12,.1,0x4f7a9a,-1.55,.3,ID/2-1.2);
+  }
   d.room=R;return R;
 }
 function roomCollide(p,r){
@@ -2322,7 +2741,7 @@ function repairBridge(b){
   else toast('You need 4 boards. Look for glowing boards nearby.')
 }
 function updateDoors(){
-  nearDoor=null;nearChest=false;nearExit=false;nearDig=null;nearBridge=null;
+  nearDoor=null;nearChest=false;nearExit=false;nearDig=null;nearBridge=null;nearGrave=false;
   if(!started||ended||trans)return;
   var px=player.pos.x,pz=player.pos.z;
   if(inRoom){
@@ -2334,6 +2753,7 @@ function updateDoors(){
     return;
   }
   var bestD=2.4;
+  if(QS.edmund&&!qDone('edmund')&&QS.edmund.s==='active'&&!QS.edmund.delivered&&curQ('edmund').kind==='deliver'&&inv.gbouquet>0&&Math.hypot(px-GRAVE.x,pz-GRAVE.z)<3)nearGrave=true;
   for(var bi=0;bi<BRIDGES.length;bi++){var bb=BRIDGES[bi];if(bb.broken&&!bb.fixed&&Math.hypot(px-bb.x,pz-bb.z)<bb.hl+2.2)nearBridge=bb}
   for(var di=0;di<items.length;di++){var dit=items[di];if(dit.dig&&!dit.got){var ddd=Math.hypot(px-dit.g.position.x,pz-dit.g.position.z);if(ddd<bestD){bestD=ddd;nearDig=dit}}}
   for(var i=0;i<DOORS.length;i++){
@@ -2391,7 +2811,8 @@ function updateNPCs(dt){
     if(d<best&&started&&!ended){best=d;nearNPC=n}
     var target=(d<8||(dlg.npc===n))?Math.atan2(player.pos.x-n.x,player.pos.z-n.z):n.homeYaw;
     n.yaw=lerpAngle(n.yaw,target,1-Math.pow(.01,dt));n.mesh.rotation.y=n.yaw;
-    n.mesh.position.y=Math.sin(time*1.6+n.x)*.025;
+    n.mesh.position.y=(n.ghost?.5:0)+Math.sin(time*1.6+n.x)*(n.ghost?.08:.025);
+    if(n.ghost){var hp=qDone(n.id);if(n.mood!==hp){n.mood=hp;GHOSTMATS.forEach(function(gm){gm.color.setHex(hp?0xfff3d0:0xb4c0dc);gm.emissive.setHex(hp?0xffd36a:0x5470b8);gm.opacity=hp?.85:.55})}n.mesh.rotation.x=hp?0:.16;if(hp&&Math.random()<.04)sparkle(n.x+(Math.random()-.5)*.8,1.2+Math.random(),n.z+(Math.random()-.5)*.8,0xffe08a)}
     animPerson(n.mesh,0,time+n.x,n.wave&&!finale&&d<16&&dlg.npc!==n);
   });
 }
@@ -2486,9 +2907,10 @@ function drawMini(){
     if(it.got||!it.beam.visible)return;
     mc.fillStyle='#ffe08a';mc.beginPath();mc.arc(mx(it.g.position.x),my(it.g.position.z),4,0,Math.PI*2);mc.fill();
   });
+  if(GV&&GV.beam.visible){mc.fillStyle='#ffe08a';mc.strokeStyle='#10202a';mc.lineWidth=3;mc.beginPath();mc.arc(mx(GRAVE.x),my(GRAVE.z),6,0,Math.PI*2);mc.fill();mc.stroke()}
   npcs.forEach(function(n){
     var st=finale?'done':qStatus(n.id);mc.fillStyle=STC[st];mc.strokeStyle='#10202a';mc.lineWidth=3;
-    mc.beginPath();mc.arc(mx(n.x),my(n.z),8,0,Math.PI*2);mc.fill();mc.stroke();
+    mc.beginPath();mc.arc(mx(n.mx!=null?n.mx:n.x),my(n.mz!=null?n.mz:n.z),8,0,Math.PI*2);mc.fill();mc.stroke();
   });
   mc.translate(mx(inRoom?inRoom.d.x:player.pos.x),my(inRoom?inRoom.d.z:player.pos.z));mc.rotate(Math.PI-player.yaw);
   mc.fillStyle='#ffffff';mc.strokeStyle='#10202a';mc.lineWidth=3;
@@ -2501,11 +2923,12 @@ function updatePrompt(){
   else if(live&&nearChest)lab='Open the chest';
   else if(live&&inRoom&&nearExit)lab='Leave the house';
   else if(live&&nearDoor&&!inRoom)lab='Enter '+nearDoor.name;
+  else if(live&&nearGrave)lab='Lay flowers on the grave';
   else if(live&&nearDig)lab='Dig for fossils';
   else if(live&&nearBridge)lab=inv.board>=4?'Repair the bridge':'Broken bridge (needs 4 boards)';
   if(lab){p.innerHTML=(isTouch?'':'<kbd>E</kbd>')+'<span></span>';p.lastChild.textContent=lab;p.hidden=isTouch}else p.hidden=true;
   $('act').classList.toggle('on',!!lab||dlg.open);
-  $('act').textContent=dlg.open?'Next':(nearNPC?'Talk':(nearChest?'Open':(nearDig?'Dig':(nearBridge?'Repair':'Enter'))));
+  $('act').textContent=dlg.open?'Next':(nearNPC?'Talk':(nearChest?'Open':(nearGrave?'Lay':(nearDig?'Dig':(nearBridge?'Repair':'Enter')))));
 }
 function updateSky(dt){
   if(finale)dusk=Math.min(1,dusk+dt/9);
